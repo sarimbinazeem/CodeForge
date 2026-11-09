@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <string>
 #include "TestCase.h"
@@ -46,7 +47,66 @@ class Problem
             testCases = nullptr;
             count = 0;
         }
+        //RULE OF THREE
 
+        Problem(const Problem& other)
+            {
+                problemID = other.problemID;
+                title = other.title;
+                description = other.description;
+                difficulty = other.difficulty;
+                topic = other.topic;
+
+                count = other.count;
+
+                if (count > 0)
+                {
+                    testCases = new TestCase[count];
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        testCases[i] = other.testCases[i];
+                    }
+                }
+                else
+                {
+                    testCases = nullptr;
+                }
+            }
+
+        // Copy assignment operator
+        Problem& operator=(const Problem& other)
+        {
+            //if it is not self-assigning
+            if (this != &other)
+            {
+                delete[] testCases;
+
+                problemID = other.problemID;
+                title = other.title;
+                description = other.description;
+                difficulty = other.difficulty;
+                topic = other.topic;
+
+                count = other.count;
+
+                if (count > 0)
+                {
+                    testCases = new TestCase[count];
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        testCases[i] = other.testCases[i];
+                    }
+                }
+                else
+                {
+                    testCases = nullptr;
+                }
+            }
+
+            return *this;
+        }
         
         ~Problem()
         {
@@ -133,5 +193,14 @@ class Problem
             }
 
             cout<<endl;
+        }
+
+        // Update Problem Details
+        void updateDetails(string newTitle,string newDescription,string newDifficulty,string newTopic)
+        {
+            title = newTitle;
+            description = newDescription;
+            difficulty = newDifficulty;
+            topic = newTopic;
         }
 };
