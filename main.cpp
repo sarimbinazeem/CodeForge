@@ -8,6 +8,9 @@
 #include "Managers/ProblemManager.h"
 #include "DSA/DynamicArray.h"
 #include "DSA/LinkedList.h"
+#include "DSA/Stack.h"
+#include "DSA/Queue.h"
+
 using namespace std;
 
 
@@ -139,48 +142,60 @@ int main()
     cout << "Index of 40: " << arr.search(40) << endl;
 
 
-    // ==================================
-    // DAY 3: LINKED LIST TESTING
-    // ==================================
+// ==================================
+// DAY 4: STACK TESTING
+// ==================================
 
-    cout << "\n===== LINKED LIST TEST =====\n";
+cout << "\n===== STACK TEST =====\n";
 
-    LinkedList<int> list;
+Stack<int> myStack;
 
-    list.insertAtEnd(10);
-    list.insertAtEnd(20);
-    list.insertAtEnd(30);
+myStack.push(10);
+myStack.push(20);
+myStack.push(30);
+myStack.push(40);
 
-    cout << "Original list: ";
-    list.display();
+cout << "Stack elements: ";
+myStack.display();
 
-    list.insertAtBeginning(5);
+cout << "Top element: " << myStack.top() << endl;
 
-    cout << "After inserting 5 at beginning: ";
-    list.display();
+cout << "Popped element: " << myStack.pop() << endl;
 
-    list.insertAt(2, 15);
+cout << "After pop: ";
+myStack.display();
 
-    cout << "After inserting 15 at index 2: ";
-    list.display();
+cout << "Stack size: " << myStack.getSize() << endl;
 
-    list.deleteAt(1);
+cout << "Is stack empty? " << myStack.isEmpty() << endl;
 
-    cout << "After deleting index 1: ";
-    list.display();
 
-    cout << "Searching for 30: ";
+// ==================================
+// DAY 4: QUEUE TESTING
+// ==================================
 
-    if (list.search(30))
-        cout << "Found\n";
-    else
-        cout << "Not found\n";
+cout << "\n===== QUEUE TEST =====\n";
 
-    list.reverse();
+Queue<int> myQueue;
 
-    cout << "After reversing: ";
-    list.display();
+myQueue.enqueue(10);
+myQueue.enqueue(20);
+myQueue.enqueue(30);
+myQueue.enqueue(40);
 
-    cout << "Linked List size: " << list.getSize() << endl;
+cout << "Queue elements: ";
+myQueue.display();
+
+cout << "Front element: " << myQueue.front() << endl;
+
+cout << "Dequeued element: " << myQueue.dequeue() << endl;
+
+cout << "After dequeue: ";
+myQueue.display();
+
+cout << "Queue size: " << myQueue.getSize() << endl;
+
+cout << "Is queue empty? " << myQueue.isEmpty() << endl;
+
     return 0;
 }
