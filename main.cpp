@@ -6,8 +6,10 @@
 #include "Models/JudgeResult.h"
 
 #include "Managers/ProblemManager.h"
-
+#include "DSA/DynamicArray.h"
+#include "DSA/LinkedList.h"
 using namespace std;
+
 
 int main()
 {
@@ -102,5 +104,83 @@ int main()
 
     cout << "\nTotal Problems: "<< manager.getProblemCount() << endl;
 
+    // ==================================
+    // DAY 3: DYNAMIC ARRAY TESTING
+    // ==================================
+
+    cout << "\n===== DYNAMIC ARRAY TEST =====\n";
+
+    DynamicArray<int> arr;
+
+    arr.pushBack(10);
+    arr.pushBack(20);
+    arr.pushBack(30);
+    arr.pushBack(40);
+    arr.pushBack(50);
+
+    cout << "Elements: ";
+    arr.display();
+
+    cout << "Size: " << arr.getSize() << endl;
+    cout << "Capacity: " << arr.getCapacity() << endl;
+
+    arr.insertAt(2, 25);
+
+    cout << "After inserting 25 at index 2: ";
+    arr.display();
+
+    arr.removeAt(1);
+
+    cout << "After removing index 1: ";
+    arr.display();
+
+    cout << "Element at index 2: " << arr.getAt(2) << endl;
+
+    cout << "Index of 40: " << arr.search(40) << endl;
+
+
+    // ==================================
+    // DAY 3: LINKED LIST TESTING
+    // ==================================
+
+    cout << "\n===== LINKED LIST TEST =====\n";
+
+    LinkedList<int> list;
+
+    list.insertAtEnd(10);
+    list.insertAtEnd(20);
+    list.insertAtEnd(30);
+
+    cout << "Original list: ";
+    list.display();
+
+    list.insertAtBeginning(5);
+
+    cout << "After inserting 5 at beginning: ";
+    list.display();
+
+    list.insertAt(2, 15);
+
+    cout << "After inserting 15 at index 2: ";
+    list.display();
+
+    list.deleteAt(1);
+
+    cout << "After deleting index 1: ";
+    list.display();
+
+    cout << "Searching for 30: ";
+
+    if (list.search(30))
+        cout << "Found\n";
+    else
+        cout << "Not found\n";
+
+    list.reverse();
+
+    cout << "After reversing: ";
+    list.display();
+
+    cout << "Linked List size: " << list.getSize() << endl;
     return 0;
 }
