@@ -12,6 +12,7 @@
 #include "DSA/Queue.h"
 #include "DSA/HashTable.h"
 #include "Managers/SubmissionManager.h"
+#include "Judge/Compiler.h"
 
 using namespace std;
 
@@ -366,6 +367,73 @@ int main()
 
     cout << "\nTotal submissions: "<< submissionManager.getSubmissionCount() << endl;
     
+
+    // ==================================
+    // DAY 7: COMPILER ENGINE TESTING
+    // ==================================
+
+    cout << "\n===== COMPILER ENGINE TEST =====\n";
+
+    Compiler compiler;
+
+    // Test 1: Valid C++ code
+
+    string validCode = R"(
+        #include <iostream>
+        using namespace std;
+
+        int main()
+        {
+            int a = 10;
+            int b = 20;
+
+            cout << a + b;
+
+            return 0;
+        }
+        )";
+
+    string errorMessage;
+
+    cout << "\nTest 1: Valid C++ submission\n";
+
+    if (compiler.compile(validCode, errorMessage))
+    {
+        cout << "Compilation successful!\n";
+        cout << "Executable created successfully.\n";
+    }
+    else
+    {
+        cout << "Compilation failed!\n";
+        cout << errorMessage << endl;
+    }
+
+
+    // Test 2: Invalid C++ code
+
+    string invalidCode = R"(
+        #include <iostream>
+        using namespace std;
+
+        int main()
+        {
+            cout << unknownVariable;
+
+            return 0;
+        }
+        )";
+
+    cout << "\nTest 2: Invalid C++ submission\n";
+
+    if (compiler.compile(invalidCode, errorMessage))
+    {
+        cout << "Compilation successful!\n";
+    }
+    else
+    {
+        cout << "Compilation failed as expected!\n";
+        cout << errorMessage << endl;
+    }
 
     return 0;
 }
