@@ -11,6 +11,7 @@
 #include "DSA/Stack.h"
 #include "DSA/Queue.h"
 #include "DSA/HashTable.h"
+#include "Managers/SubmissionManager.h"
 
 using namespace std;
 
@@ -143,135 +144,228 @@ int main()
     cout << "Index of 40: " << arr.search(40) << endl;
 
 
-// ==================================
-// DAY 4: STACK TESTING
-// ==================================
+    // ==================================
+    // DAY 4: STACK TESTING
+    // ==================================
 
-cout << "\n===== STACK TEST =====\n";
+    cout << "\n===== STACK TEST =====\n";
 
-Stack<int> myStack;
+    Stack<int> myStack;
 
-myStack.push(10);
-myStack.push(20);
-myStack.push(30);
-myStack.push(40);
+    myStack.push(10);
+    myStack.push(20);
+    myStack.push(30);
+    myStack.push(40);
 
-cout << "Stack elements: ";
-myStack.display();
+    cout << "Stack elements: ";
+    myStack.display();
 
-cout << "Top element: " << myStack.top() << endl;
+    cout << "Top element: " << myStack.top() << endl;
 
-cout << "Popped element: " << myStack.pop() << endl;
+    cout << "Popped element: " << myStack.pop() << endl;
 
-cout << "After pop: ";
-myStack.display();
+    cout << "After pop: ";
+    myStack.display();
 
-cout << "Stack size: " << myStack.getSize() << endl;
+    cout << "Stack size: " << myStack.getSize() << endl;
 
-cout << "Is stack empty? " << myStack.isEmpty() << endl;
-
-
-// ==================================
-// DAY 4: QUEUE TESTING
-// ==================================
-
-cout << "\n===== QUEUE TEST =====\n";
-
-Queue<int> myQueue;
-
-myQueue.enqueue(10);
-myQueue.enqueue(20);
-myQueue.enqueue(30);
-myQueue.enqueue(40);
-
-cout << "Queue elements: ";
-myQueue.display();
-
-cout << "Front element: " << myQueue.front() << endl;
-
-cout << "Dequeued element: " << myQueue.dequeue() << endl;
-
-cout << "After dequeue: ";
-myQueue.display();
-
-cout << "Queue size: " << myQueue.getSize() << endl;
-
-cout << "Is queue empty? " << myQueue.isEmpty() << endl;
+    cout << "Is stack empty? " << myStack.isEmpty() << endl;
 
 
     // ==================================
-    // DAY 5: HASH TABLE TESTING
+    // DAY 4: QUEUE TESTING
     // ==================================
 
-    cout << "\n===== HASH TABLE TEST =====\n";
+    cout << "\n===== QUEUE TEST =====\n";
 
-    HashTable<string> hashTable;
+    Queue<int> myQueue;
 
-    // Insert entries
-    hashTable.insert(15, "Addition");
-    hashTable.insert(22, "Binary Search");
-    hashTable.insert(35, "Reverse Array");
-    hashTable.insert(42, "Merge Sort");
-    hashTable.insert(18, "Linked List");
+    myQueue.enqueue(10);
+    myQueue.enqueue(20);
+    myQueue.enqueue(30);
+    myQueue.enqueue(40);
 
-    cout << "\nHash Table:\n";
-    hashTable.display();
+    cout << "Queue elements: ";
+    myQueue.display();
 
-    // Search
-    string result;
+    cout << "Front element: " << myQueue.front() << endl;
 
-    cout << "\nSearching for key 35:\n";
+    cout << "Dequeued element: " << myQueue.dequeue() << endl;
 
-    if (hashTable.search(35, result))
-        cout << "Found: " << result << endl;
-    else
-        cout << "Key not found!\n";
+    cout << "After dequeue: ";
+    myQueue.display();
 
-    // Update existing key
-    cout << "\nUpdating key 35:\n";
+    cout << "Queue size: " << myQueue.getSize() << endl;
 
-    hashTable.insert(35, "Array Reversal");
+    cout << "Is queue empty? " << myQueue.isEmpty() << endl;
 
-    if (hashTable.search(35, result))
-        cout << "Updated value: " << result << endl;
 
-    // Delete
-    cout << "\nDeleting key 22:\n";
+        // ==================================
+        // DAY 5: HASH TABLE TESTING
+        // ==================================
 
-    if (hashTable.remove(22))
-        cout << "Deleted successfully!\n";
-    else
-        cout << "Key not found!\n";
+        cout << "\n===== HASH TABLE TEST =====\n";
 
-    // Display after deletion
-    cout << "\nAfter deletion:\n";
-    hashTable.display();
+        HashTable<string> hashTable;
 
-    // Information
-    cout << "\nTotal entries: "
-         << hashTable.getSize() << endl;
+        // Insert entries
+        hashTable.insert(15, "Addition");
+        hashTable.insert(22, "Binary Search");
+        hashTable.insert(35, "Reverse Array");
+        hashTable.insert(42, "Merge Sort");
+        hashTable.insert(18, "Linked List");
 
-    cout << "Capacity: "
-         << hashTable.getCapacity() << endl;
+        cout << "\nHash Table:\n";
+        hashTable.display();
 
-    cout << "Load Factor: "<< hashTable.getLoadFactor() << endl;
+        // Search
+        string result;
 
-    cout << "\n===== RESIZING TEST =====\n";
+        cout << "\nSearching for key 35:\n";
 
-    HashTable<int> resizeTest;
+        if (hashTable.search(35, result))
+            cout << "Found: " << result << endl;
+        else
+            cout << "Key not found!\n";
 
-    for (int i = 1; i <= 8; i++)
+        // Update existing key
+        cout << "\nUpdating key 35:\n";
+
+        hashTable.insert(35, "Array Reversal");
+
+        if (hashTable.search(35, result))
+            cout << "Updated value: " << result << endl;
+
+        // Delete
+        cout << "\nDeleting key 22:\n";
+
+        if (hashTable.remove(22))
+            cout << "Deleted successfully!\n";
+        else
+            cout << "Key not found!\n";
+
+        // Display after deletion
+        cout << "\nAfter deletion:\n";
+        hashTable.display();
+
+        // Information
+        cout << "\nTotal entries: "
+            << hashTable.getSize() << endl;
+
+        cout << "Capacity: "
+            << hashTable.getCapacity() << endl;
+
+        cout << "Load Factor: "<< hashTable.getLoadFactor() << endl;
+
+        cout << "\n===== RESIZING TEST =====\n";
+
+        HashTable<int> resizeTest;
+
+        for (int i = 1; i <= 8; i++)
+        {
+            resizeTest.insert(i, i * 100);
+        }
+
+        cout << "Entries: " << resizeTest.getSize() << endl;
+        cout << "New capacity: " << resizeTest.getCapacity() << endl;
+
+        int foundValue;
+
+        if (resizeTest.search(5, foundValue))
+            cout << "Key 5 value: " << foundValue << endl;
+
+
+    // ==================================
+    // DAY 6: SUBMISSION MANAGER TESTING
+    // ==================================
+
+    cout << "\n===== SUBMISSION MANAGER TEST =====\n";
+
+    SubmissionManager submissionManager;
+
+    // Create submissions
+    Submission s1(
+        101,
+        1,
+        "int main() { return 0; }",
+        "C++"
+    );
+
+    Submission s2(
+        102,
+        2,
+        "int main() { return 1; }",
+        "C++"
+    );
+
+    Submission s3(
+        103,
+        1,
+        "int main() { return 2; }",
+        "C++"
+    );
+
+    // Add submissions
+    submissionManager.addSubmission(s1);
+    submissionManager.addSubmission(s2);
+    submissionManager.addSubmission(s3);
+
+    // Test duplicate ID
+    cout << "\nTesting duplicate ID:\n";
+
+    submissionManager.addSubmission(s1);
+
+    // Display all
+    cout << "\nAll submissions:\n";
+
+    submissionManager.displaySubmissions();
+
+    // Search by ID
+    cout << "\nSearching for submission 102:\n";
+
+    Submission foundSubmission;
+
+    if (submissionManager.findSubmissionByID( 102, foundSubmission))
     {
-        resizeTest.insert(i, i * 100);
+        foundSubmission.display();
+    }
+    else
+    {
+        cout << "Submission not found!\n";
     }
 
-    cout << "Entries: " << resizeTest.getSize() << endl;
-    cout << "New capacity: " << resizeTest.getCapacity() << endl;
+    // Display by problem ID
+    cout << "\nSubmissions for Problem 1:\n";
 
-    int foundValue;
+    submissionManager.displayByProblem(1);
 
-    if (resizeTest.search(5, foundValue))
-        cout << "Key 5 value: " << foundValue << endl;
+    // Update status
+    cout << "\nUpdating submission 101 status:\n";
+
+    if (submissionManager.updateSubmissionStatus(101, "Accepted"))
+    {
+        cout << "Status updated successfully!\n";
+    }
+
+    // Search again to verify update
+    if (submissionManager.findSubmissionByID(
+        101, foundSubmission))
+    {
+        foundSubmission.display();
+    }
+
+    // Delete submission
+    cout << "\nDeleting submission 102:\n";
+
+    submissionManager.deleteSubmission(102);
+
+    // Final display
+    cout << "\nRemaining submissions:\n";
+
+    submissionManager.displaySubmissions();
+
+    cout << "\nTotal submissions: "<< submissionManager.getSubmissionCount() << endl;
+    
 
     return 0;
 }
