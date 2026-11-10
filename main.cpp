@@ -10,6 +10,7 @@
 #include "DSA/LinkedList.h"
 #include "DSA/Stack.h"
 #include "DSA/Queue.h"
+#include "DSA/HashTable.h"
 
 using namespace std;
 
@@ -196,6 +197,81 @@ myQueue.display();
 cout << "Queue size: " << myQueue.getSize() << endl;
 
 cout << "Is queue empty? " << myQueue.isEmpty() << endl;
+
+
+    // ==================================
+    // DAY 5: HASH TABLE TESTING
+    // ==================================
+
+    cout << "\n===== HASH TABLE TEST =====\n";
+
+    HashTable<string> hashTable;
+
+    // Insert entries
+    hashTable.insert(15, "Addition");
+    hashTable.insert(22, "Binary Search");
+    hashTable.insert(35, "Reverse Array");
+    hashTable.insert(42, "Merge Sort");
+    hashTable.insert(18, "Linked List");
+
+    cout << "\nHash Table:\n";
+    hashTable.display();
+
+    // Search
+    string result;
+
+    cout << "\nSearching for key 35:\n";
+
+    if (hashTable.search(35, result))
+        cout << "Found: " << result << endl;
+    else
+        cout << "Key not found!\n";
+
+    // Update existing key
+    cout << "\nUpdating key 35:\n";
+
+    hashTable.insert(35, "Array Reversal");
+
+    if (hashTable.search(35, result))
+        cout << "Updated value: " << result << endl;
+
+    // Delete
+    cout << "\nDeleting key 22:\n";
+
+    if (hashTable.remove(22))
+        cout << "Deleted successfully!\n";
+    else
+        cout << "Key not found!\n";
+
+    // Display after deletion
+    cout << "\nAfter deletion:\n";
+    hashTable.display();
+
+    // Information
+    cout << "\nTotal entries: "
+         << hashTable.getSize() << endl;
+
+    cout << "Capacity: "
+         << hashTable.getCapacity() << endl;
+
+    cout << "Load Factor: "<< hashTable.getLoadFactor() << endl;
+
+    cout << "\n===== RESIZING TEST =====\n";
+
+    HashTable<int> resizeTest;
+
+    for (int i = 1; i <= 8; i++)
+    {
+        resizeTest.insert(i, i * 100);
+    }
+
+    cout << "Entries: " << resizeTest.getSize() << endl;
+    cout << "New capacity: " << resizeTest.getCapacity() << endl;
+
+    int foundValue;
+
+    if (resizeTest.search(5, foundValue))
+        cout << "Key 5 value: " << foundValue << endl;
 
     return 0;
 }
