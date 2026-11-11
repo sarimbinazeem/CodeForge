@@ -221,4 +221,14 @@ public:
     {
         return problemCount;
     }
+
+    //returns copy of problem
+    Problem getProblemAt(int index) const
+    {
+        if (index < 0 || index >= problemCount)
+            return Problem();
+
+        return problems[index];
+    }
+
 };

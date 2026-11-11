@@ -15,6 +15,7 @@
 #include "Judge/Compiler.h"
 #include "Judge/ProgramRunner.h"
 #include "Judge/JudgeEngine.h"
+#include "Storage/StorageManager.h"
 
 using namespace std;
 
@@ -22,111 +23,69 @@ using namespace std;
 int main()
 {
 
-cout << "\n===== AUTOMATED JUDGE TEST =====\n";
+    cout << "\n===== PROBLEM STORAGE TEST =====\n";
 
-JudgeEngine judge;
+    StorageManager storage;
 
-// Create a problem.
-Problem testProblem(999,"Add Two Numbers","Read two integers and print their sum.","Easy","Basic Programming");
+    // Create a manager with sample problems.
+    ProblemManager storageTestManager;
 
-// Add test cases.
-testProblem.addTestCase(TestCase("10 20", "30"));
-testProblem.addTestCase(TestCase("5 7", "12"));
+    Problem p1(
+        501,
+        "Addition",
+        "Read two integers and print their sum.",
+        "Easy",
+        "Basic Programming"
+    );
 
+    p1.addTestCase(TestCase("10 20", "30"));
+    p1.addTestCase(TestCase("5 7", "12"));
 
-// ====================================
-// TEST 1: ACCEPTED
-// ====================================
+    Problem p2(
+        502,
+        "Reverse Array",
+        "Reverse the elements of an array.",
+        "Medium",
+        "Arrays"
+    );
 
-string correctCode = R"(
-#include <iostream>
-using namespace std;
+    p2.addTestCase(TestCase("3\n1 2 3", "3 2 1"));
+    p2.addTestCase(TestCase("4\n5 6 7 8", "8 7 6 5"));
 
-int main()
-{
-    int a, b;
-    cin >> a >> b;
+    storageTestManager.addProblem(p1);
+    storageTestManager.addProblem(p2);
 
-    cout << a + b;
+    // Save problems.
+    cout << "\nSaving problems...\n";
 
-    return 0;
-}
-)";
+    if (storage.saveProblems(storageTestManager))
+    {
+        cout << "Problems saved successfully!\n";
+    }
+    else
+    {
+        cout << "Unable to save problems!\n";
+    }
 
-Submission submission1(9001,999,correctCode,"C++");
+    // Create a fresh manager.
+    ProblemManager loadedManager;
 
-cout << "\nTEST 1: Correct Submission\n";
+    // Load saved problems.
+    cout << "\nLoading problems...\n";
 
-JudgeResult result1 = judge.judgeSubmission(testProblem, submission1);
+    if (storage.loadProblems(loadedManager))
+    {
+        cout << "Problems loaded successfully!\n";
 
-result1.displayResult();
-submission1.display();
+        cout << "\nLoaded problem count: "
+            << loadedManager.getProblemCount() << endl;
 
-
-// ====================================
-// TEST 2: WRONG ANSWER
-// ====================================
-
-string wrongCode = R"(
-#include <iostream>
-using namespace std;
-
-int main()
-{
-    int a, b;
-    cin >> a >> b;
-
-    cout << a * b;
-
-    return 0;
-}
-)";
-
-Submission submission2(
-    9002,
-    999,
-    wrongCode,
-    "C++"
-);
-
-cout << "\nTEST 2: Wrong Answer Submission\n";
-
-JudgeResult result2 =
-    judge.judgeSubmission(testProblem, submission2);
-
-result2.displayResult();
-submission2.display();
-
-
-// ====================================
-// TEST 3: COMPILATION ERROR
-// ====================================
-
-string invalidCode = R"(
-#include <iostream>
-using namespace std;
-
-int main()
-{
-    cout << unknownVariable;
-    return 0;
-}
-)";
-
-Submission submission3(
-    9003,
-    999,
-    invalidCode,
-    "C++"
-);
-
-cout << "\nTEST 3: Compilation Error Submission\n";
-
-JudgeResult result3 =
-    judge.judgeSubmission(testProblem, submission3);
-
-result3.displayResult();
-submission3.display();
+        loadedManager.displayAllProblems();
+    }
+    else
+    {
+        cout << "Unable to load problems!\n";
+    }
 
 
 
