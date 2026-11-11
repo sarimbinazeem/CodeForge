@@ -1,11 +1,14 @@
 
-        #include <iostream>
-        using namespace std;
+    #include <iostream>
+    using namespace std;
 
-        int main()
-        {
-            cout << unknownVariable;
+    int main()
+    {
+        int a, b;
+        cin >> a >> b;
 
-            return 0;
-        }
-        
+        cout << a + b;
+
+        return 0;
+    }
+    

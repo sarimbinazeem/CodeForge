@@ -20,10 +20,12 @@ class ProgramRunner
         ProgramRunner()
         {
             //Initliaze Folders
-            executableFile = "Judge/Workspace/submission.exe";
-            inputFile = "Judge/Workspace/input.txt";
-            outputFile = "Judge/Workspace/output.txt";
-            errorFile = "Judge/Workspace/runtime_errors.txt";
+            string workspace = "Judge\\Workspace\\";
+
+            executableFile = workspace + "submission.exe";
+            inputFile = workspace + "input.txt";
+            outputFile = workspace + "output.txt";
+            errorFile = workspace + "runtime_errors.txt";
         }
         
         // Read a file and return its contents.
@@ -78,10 +80,13 @@ class ProgramRunner
             clearError.close();
 
             // Run the executable and redirect input/output.
+
             string command =
-                "\"" + executableFile + "\" < \"" + inputFile + "\" > \"" + 
+                "cmd /C \"\"" + executableFile + "\" < \"" +
+                inputFile + "\" > \"" +
                 outputFile + "\" 2> \"" +
-                errorFile + "\"";
+                errorFile + "\"\"";
+
 
             int result = system(command.c_str());
 
