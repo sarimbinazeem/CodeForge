@@ -16,126 +16,101 @@
 #include "Judge/ProgramRunner.h"
 #include "Judge/JudgeEngine.h"
 #include "Storage/StorageManager.h"
+#include "CodeForge.h"
 
 using namespace std;
 
 
 int main()
 {
+    cout << "\n===== CODEFORGE SYSTEM INTEGRATION TEST =====\n";
+
+    // Create the central system.
+    CodeForgeSystem system;
+
+    // Load previously saved information.
+    system.initialize();
 
 
-cout << "\n===== SUBMISSION STORAGE TEST =====\n";
+    // ------------------------------------
+    // STEP 1: ADD A NEW PROBLEM
+    // ------------------------------------
 
-StorageManager storage;
+    Problem problem(
+        800,
+        "Add Two Numbers",
+        "Read two integers and print their sum.",
+        "Easy",
+        "Basic Programming"
+    );
 
-SubmissionManager submissionTestManager;
+    problem.addTestCase(TestCase("10 20", "30"));
+    problem.addTestCase(TestCase("5 7", "12"));
 
-// Create sample submissions.
+    cout << "\nAdding a new problem...\n";
 
-Submission s1(
-    7001,
-    501,
-    R"(
-#include <iostream>
-using namespace std;
-
-int main()
-{
-    int a, b;
-    cin >> a >> b;
-    cout << a + b;
-    return 0;
-}
-)",
-    "C++"
-);
-
-s1.setStatus("Accepted");
+    system.addProblem(problem);
 
 
-Submission s2(
-    7002,
-    502,
-    R"(
-#include <iostream>
-using namespace std;
+    // ------------------------------------
+    // STEP 2: SUBMIT A SOLUTION
+    // ------------------------------------
 
-int main()
-{
-    int n;
-    cin >> n;
+    string sourceCode = R"(
+    #include <iostream>
+    using namespace std;
 
-    int arr[100];
+    int main()
+    {
+        int a, b;
+        cin >> a >> b;
 
-    for (int i = 0; i < n; i++)
-        cin >> arr[i];
+        cout << a + b;
 
-    for (int i = n - 1; i >= 0; i--)
-        cout << arr[i] << " ";
+        return 0;
+    }
+    )";
 
-    return 0;
-}
-)",
-    "C++"
-);
+    JudgeResult result;
 
-s2.setStatus("Wrong Answer");
+    cout << "\nSubmitting solution...\n";
 
+    bool submitted = system.submitSolution(
+        8001,
+        800,
+        sourceCode,
+        "C++",
+        result
+    );
 
-Submission s3(
-    7003,
-    501,
-    "int main(){ return 0; }",
-    "C++"
-);
+    if (submitted)
+    {
+        cout << "\n===== JUDGE RESULT =====\n";
 
-s3.setStatus("Compilation Error");
-
-
-// Add submissions to the manager.
-
-submissionTestManager.addSubmission(s1);
-submissionTestManager.addSubmission(s2);
-submissionTestManager.addSubmission(s3);
+        result.displayResult();
+    }
 
 
-// Save submissions.
+    // ------------------------------------
+    // STEP 3: DISPLAY DATA
+    // ------------------------------------
 
-cout << "\nSaving submissions...\n";
+    cout << "\n===== ALL PROBLEMS =====\n";
 
-if (storage.saveSubmission(submissionTestManager))
-{
-    cout << "Submissions saved successfully!\n";
-}
-else
-{
-    cout << "Unable to save submissions!\n";
-}
+    system.displayProblems();
 
+    cout << "\n===== ALL SUBMISSIONS =====\n";
 
-// Create a fresh manager.
-
-SubmissionManager loadedSubmissionManager;
+    system.displaySubmissions();
 
 
-// Load submissions.
+    // ------------------------------------
+    // STEP 4: SAVE EVERYTHING
+    // ------------------------------------
 
-cout << "\nLoading submissions...\n";
+    cout << "\nSaving CodeForge data...\n";
 
-if (storage.loadSubmission(loadedSubmissionManager))
-{
-    cout << "Submissions loaded successfully!\n";
-
-    cout << "\nLoaded submission count: "
-         << loadedSubmissionManager.getSubmissionCount()
-         << endl;
-
-    loadedSubmissionManager.displaySubmissions();
-}
-else
-{
-    cout << "Unable to load submissions!\n";
-}
+    system.saveData();
 
 
     return 0;
