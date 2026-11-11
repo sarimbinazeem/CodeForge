@@ -1,0 +1,4 @@
+Judge/Workspace/submission.cpp: In function 'int main()':
+Judge/Workspace/submission.cpp:7:13: error: 'unknownVariable' was not declared in this scope
+    7 |     cout << unknownVariable;
+      |             ^~~~~~~~~~~~~~~

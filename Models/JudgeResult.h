@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <iostream>
 using namespace std;
@@ -70,9 +71,9 @@ public:
     // Display result
     void displayResult() const
     {
-        cout << "Verdict: \n" << verdict;
-        cout << "Test Cases Passed: "<< passed << "/"<< totalTestCases;
-        cout << "\nExecution Time: "<< executionTime << " ms\n";
+        cout << "Verdict: " << verdict<<endl;
+        cout << "Test Cases Passed: "<< passed << "/"<< totalTestCases<<endl;
+        cout << "Execution Time: "<< executionTime << " ms\n";
         cout << "Memory Used: "<< memoryUsed << " KB\n";
         if (error != "")
         {

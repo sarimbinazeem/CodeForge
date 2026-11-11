@@ -14,128 +14,121 @@
 #include "Managers/SubmissionManager.h"
 #include "Judge/Compiler.h"
 #include "Judge/ProgramRunner.h"
+#include "Judge/JudgeEngine.h"
 
 using namespace std;
 
 
 int main()
 {
-    // ==================================
-    // DAY 7: COMPILER ENGINE TESTING
-    // ==================================
 
-    cout << "\n===== COMPILER ENGINE TEST =====\n";
+cout << "\n===== AUTOMATED JUDGE TEST =====\n";
 
-    Compiler compiler;
+JudgeEngine judge;
 
-    // Test 1: Valid C++ code
+// Create a problem.
+Problem testProblem(999,"Add Two Numbers","Read two integers and print their sum.","Easy","Basic Programming");
 
-    string validCode = R"(
-        #include <iostream>
-        using namespace std;
-
-        int main()
-        {
-            int a = 10;
-            int b = 20;
-
-            cout << a + b;
-
-            return 0;
-        }
-        )";
-
-    string errorMessage;
-
-    cout << "\nTest 1: Valid C++ submission\n";
-
-    if (compiler.compile(validCode, errorMessage))
-    {
-        cout << "Compilation successful!\n";
-        cout << "Executable created successfully.\n";
-    }
-    else
-    {
-        cout << "Compilation failed!\n";
-        cout << errorMessage << endl;
-    }
+// Add test cases.
+testProblem.addTestCase(TestCase("10 20", "30"));
+testProblem.addTestCase(TestCase("5 7", "12"));
 
 
-    // Test 2: Invalid C++ code
+// ====================================
+// TEST 1: ACCEPTED
+// ====================================
 
-    string invalidCode = R"(
-        #include <iostream>
-        using namespace std;
+string correctCode = R"(
+#include <iostream>
+using namespace std;
 
-        int main()
-        {
-            cout << unknownVariable;
+int main()
+{
+    int a, b;
+    cin >> a >> b;
 
-            return 0;
-        }
-        )";
+    cout << a + b;
 
-    cout << "\nTest 2: Invalid C++ submission\n";
+    return 0;
+}
+)";
 
-    if (compiler.compile(invalidCode, errorMessage))
-    {
-        cout << "Compilation successful!\n";
-    }
-    else
-    {
-        cout << "Compilation failed as expected!\n";
-        cout << errorMessage << endl;
-    }
+Submission submission1(9001,999,correctCode,"C++");
 
-    cout << "\n===== PROGRAM RUNNER TEST =====\n";
+cout << "\nTEST 1: Correct Submission\n";
 
-    ProgramRunner runner;
+JudgeResult result1 = judge.judgeSubmission(testProblem, submission1);
 
-    string sourceCode = R"(
-    #include <iostream>
-    using namespace std;
+result1.displayResult();
+submission1.display();
 
-    int main()
-    {
-        int a, b;
-        cin >> a >> b;
 
-        cout << a + b;
+// ====================================
+// TEST 2: WRONG ANSWER
+// ====================================
 
-        return 0;
-    }
-    )";
+string wrongCode = R"(
+#include <iostream>
+using namespace std;
 
-    string output;
+int main()
+{
+    int a, b;
+    cin >> a >> b;
 
-    // First compile the program.
-    cout << "\nCompiling submission...\n";
+    cout << a * b;
 
-    if (compiler.compile(sourceCode, errorMessage))
-    {
-        cout << "Compilation successful!\n";
+    return 0;
+}
+)";
 
-        // Now execute the compiled program.
-        cout << "\nRunning submission...\n";
+Submission submission2(
+    9002,
+    999,
+    wrongCode,
+    "C++"
+);
 
-        string input = "10 20";
+cout << "\nTEST 2: Wrong Answer Submission\n";
 
-        if (runner.run(input, output, errorMessage))
-        {
-            cout << "Execution successful!\n";
-            cout << "Program output: " << output;
-        }
-        else
-        {
-            cout << "Execution failed!\n";
-            cout << errorMessage << endl;
-        }
-    }
-    else
-    {
-        cout << "Compilation failed!\n";
-        cout << errorMessage << endl;
-    }
+JudgeResult result2 =
+    judge.judgeSubmission(testProblem, submission2);
+
+result2.displayResult();
+submission2.display();
+
+
+// ====================================
+// TEST 3: COMPILATION ERROR
+// ====================================
+
+string invalidCode = R"(
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    cout << unknownVariable;
+    return 0;
+}
+)";
+
+Submission submission3(
+    9003,
+    999,
+    invalidCode,
+    "C++"
+);
+
+cout << "\nTEST 3: Compilation Error Submission\n";
+
+JudgeResult result3 =
+    judge.judgeSubmission(testProblem, submission3);
+
+result3.displayResult();
+submission3.display();
+
+
 
     return 0;
 }
