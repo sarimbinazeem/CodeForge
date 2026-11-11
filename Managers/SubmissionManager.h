@@ -132,6 +132,15 @@ class SubmissionManager
         {
             return submissions.getSize();
         }
+
+        Submission getSubmissionAt(int index) const
+        {
+            if (index < 0 || index >= submissions.getSize())
+                return Submission();
+
+            return submissions.getAt(index);
+        }
+        
         bool isEmpty() const
         {
             return submissions.isEmpty();

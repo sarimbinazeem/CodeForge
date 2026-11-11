@@ -23,70 +23,119 @@ using namespace std;
 int main()
 {
 
-    cout << "\n===== PROBLEM STORAGE TEST =====\n";
 
-    StorageManager storage;
+cout << "\n===== SUBMISSION STORAGE TEST =====\n";
 
-    // Create a manager with sample problems.
-    ProblemManager storageTestManager;
+StorageManager storage;
 
-    Problem p1(
-        501,
-        "Addition",
-        "Read two integers and print their sum.",
-        "Easy",
-        "Basic Programming"
-    );
+SubmissionManager submissionTestManager;
 
-    p1.addTestCase(TestCase("10 20", "30"));
-    p1.addTestCase(TestCase("5 7", "12"));
+// Create sample submissions.
 
-    Problem p2(
-        502,
-        "Reverse Array",
-        "Reverse the elements of an array.",
-        "Medium",
-        "Arrays"
-    );
+Submission s1(
+    7001,
+    501,
+    R"(
+#include <iostream>
+using namespace std;
 
-    p2.addTestCase(TestCase("3\n1 2 3", "3 2 1"));
-    p2.addTestCase(TestCase("4\n5 6 7 8", "8 7 6 5"));
+int main()
+{
+    int a, b;
+    cin >> a >> b;
+    cout << a + b;
+    return 0;
+}
+)",
+    "C++"
+);
 
-    storageTestManager.addProblem(p1);
-    storageTestManager.addProblem(p2);
+s1.setStatus("Accepted");
 
-    // Save problems.
-    cout << "\nSaving problems...\n";
 
-    if (storage.saveProblems(storageTestManager))
-    {
-        cout << "Problems saved successfully!\n";
-    }
-    else
-    {
-        cout << "Unable to save problems!\n";
-    }
+Submission s2(
+    7002,
+    502,
+    R"(
+#include <iostream>
+using namespace std;
 
-    // Create a fresh manager.
-    ProblemManager loadedManager;
+int main()
+{
+    int n;
+    cin >> n;
 
-    // Load saved problems.
-    cout << "\nLoading problems...\n";
+    int arr[100];
 
-    if (storage.loadProblems(loadedManager))
-    {
-        cout << "Problems loaded successfully!\n";
+    for (int i = 0; i < n; i++)
+        cin >> arr[i];
 
-        cout << "\nLoaded problem count: "
-            << loadedManager.getProblemCount() << endl;
+    for (int i = n - 1; i >= 0; i--)
+        cout << arr[i] << " ";
 
-        loadedManager.displayAllProblems();
-    }
-    else
-    {
-        cout << "Unable to load problems!\n";
-    }
+    return 0;
+}
+)",
+    "C++"
+);
 
+s2.setStatus("Wrong Answer");
+
+
+Submission s3(
+    7003,
+    501,
+    "int main(){ return 0; }",
+    "C++"
+);
+
+s3.setStatus("Compilation Error");
+
+
+// Add submissions to the manager.
+
+submissionTestManager.addSubmission(s1);
+submissionTestManager.addSubmission(s2);
+submissionTestManager.addSubmission(s3);
+
+
+// Save submissions.
+
+cout << "\nSaving submissions...\n";
+
+if (storage.saveSubmission(submissionTestManager))
+{
+    cout << "Submissions saved successfully!\n";
+}
+else
+{
+    cout << "Unable to save submissions!\n";
+}
+
+
+// Create a fresh manager.
+
+SubmissionManager loadedSubmissionManager;
+
+
+// Load submissions.
+
+cout << "\nLoading submissions...\n";
+
+if (storage.loadSubmission(loadedSubmissionManager))
+{
+    cout << "Submissions loaded successfully!\n";
+
+    cout << "\nLoaded submission count: "
+         << loadedSubmissionManager.getSubmissionCount()
+         << endl;
+
+    loadedSubmissionManager.displaySubmissions();
+}
+else
+{
+    cout << "Unable to load submissions!\n";
+}
 
 
     return 0;

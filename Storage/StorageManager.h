@@ -6,6 +6,8 @@
 #include <filesystem>
 #include "../Models/Problem.h"
 #include "../Managers/ProblemManager.h"
+#include "../Models/Submission.h"
+#include "../Managers/SubmissionManager.h"
 
 using namespace std;
 
@@ -17,11 +19,13 @@ class StorageManager
 {
     private:
         string problemFile;
+        string submissionFile;
 
     public:
         StorageManager()
         {
             problemFile = "Storage/problems.dat";
+            submissionFile = "Storage/submissions.dat";
             filesystem::create_directories("Storage");
         }
         
@@ -103,6 +107,34 @@ class StorageManager
             return !file.fail();
         }
 
+        bool saveSubmission(const SubmissionManager& manager){
+            ofstream file(submissionFile, ios::binary);
+
+            if(!file.is_open()){
+                return false;
+            }
+
+            int count = manager.getSubmissionCount();
+            //create buffer
+            file.write((char*)&count, sizeof(count));
+            for(int i = 0 ; i<count ; i++)
+            {
+                Submission sub = manager.getSubmissionAt(i);
+                int subID = sub.getSubmissionID();
+                int probID = sub.getProblemID();
+                //we can write the ID directly
+                file.write((char*)&subID, sizeof(subID));
+                file.write((char*)&probID, sizeof(probID));
+
+                writeString(file,sub.getSourceCode());
+                writeString(file,sub.getLanguage());
+                writeString(file,sub.getStatus());
+            }
+
+            file.close();
+            return !file.fail();
+        }
+
         // Load problems from storage.
         bool loadProblems(ProblemManager& manager)
         {
@@ -172,4 +204,58 @@ class StorageManager
 
             return true;
         }
+
+        bool loadSubmission(SubmissionManager &manager){
+            ifstream file(submissionFile,ios::binary);
+
+            if(!file.is_open()){
+                return false;
+            }
+
+            int count;
+            //get the number of count
+            if(!file.read((char*)&count,sizeof(count))){
+                return false; //empty file
+            }
+             if (count < 0 || count > 100000)
+             {
+                //boundary check
+                 return false;          
+             }
+
+             for(int i =0 ; i<count; i++)
+             {
+                int submissionID;
+                int problemID;
+
+                if (!file.read((char*)&submissionID, sizeof(submissionID)) ||!file.read((char*)&problemID, sizeof(problemID)))
+                {
+                    return false;
+                }
+
+                string sourceCode;
+                string language;
+                string status;
+
+                if (!readString(file, sourceCode) || !readString(file, language) || !readString(file, status))
+                {
+                    return false;
+                }
+
+                Submission submission(submissionID,problemID,sourceCode,language);
+
+                submission.setStatus(status);
+                //add submission only if it doesnt exist
+                if (!manager.addSubmission(submission))
+                {
+                    cout << "Submission ID " << submissionID<< " already exists. Skipping.\n";
+                }
+            }
+
+            file.close();
+
+            return true;
+        }                
+    
+        
 };
