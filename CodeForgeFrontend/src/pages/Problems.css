@@ -1,0 +1,58 @@
+
+.problems-page {
+    padding: 50px 7%;
+    max-width: 1500px;
+    margin: auto;
+}
+
+.problems-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
+.problems-header h1 {
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.problems-header p {
+    color: #999;
+    font-size: 14px;
+}
+
+.problem-total {
+    color: #aaa;
+    font-size: 13px;
+    background-color: #202020;
+    padding: 10px 15px;
+    border-radius: 6px;
+}
+
+.problems-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.loading-message,
+.empty-message {
+    color: #999;
+    padding: 30px 0;
+}
+
+.error-message {
+    color: #f87171;
+    background-color: #291719;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+@media (max-width: 650px) {
+    .problems-header {
+        align-items: flex-start;
+        gap: 15px;
+        flex-direction: column;
+    }
+}
