@@ -1,0 +1,217 @@
+
+.code-editor {
+    background-color: #181818;
+    border: 1px solid #292929;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.editor-toolbar {
+    height: 55px;
+    padding: 0 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #202020;
+    border-bottom: 1px solid #292929;
+}
+
+.editor-language {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #ddd;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.language-indicator {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background-color: #3572a5;
+}
+
+.reset-button {
+    background: transparent;
+    border: 1px solid #444;
+    color: #aaa;
+    padding: 7px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.reset-button:hover {
+    color: white;
+    border-color: #777;
+}
+
+.editor-textarea {
+    display: block;
+    width: 100%;
+    min-height: 380px;
+    padding: 22px;
+
+    background-color: #111;
+    color: #e0e0e0;
+
+    border: none;
+    outline: none;
+    resize: vertical;
+
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    tab-size: 4;
+    white-space: pre;
+}
+
+.editor-textarea:disabled {
+    opacity: 0.65;
+}
+
+.editor-footer {
+    min-height: 65px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #202020;
+    border-top: 1px solid #292929;
+}
+
+.editor-hint {
+    color: #888;
+    font-size: 12px;
+}
+
+.submit-button {
+    padding: 11px 18px;
+    background-color: #b20710;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.submit-button:hover:not(:disabled) {
+    background-color: #d20a15;
+}
+
+.submit-button:disabled,
+.reset-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.submission-error {
+    margin: 18px;
+    padding: 14px;
+    color: #f87171;
+    background-color: #291719;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.judge-result {
+    margin: 18px;
+    padding: 20px;
+    background-color: #202020;
+    border: 1px solid #333;
+    border-radius: 8px;
+}
+
+.result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.result-header h3 {
+    font-size: 16px;
+}
+
+.verdict {
+    padding: 7px 12px;
+    border-radius: 5px;
+    background-color: #333;
+    color: #ddd;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.verdict.accepted {
+    background-color: #153522;
+    color: #4ade80;
+}
+
+.verdict.wrong-answer,
+.verdict.runtime-error,
+.verdict.compilation-error {
+    background-color: #3a1d20;
+    color: #f87171;
+}
+
+.result-statistics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 35px;
+}
+
+.result-statistics div {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.result-statistics span {
+    color: #888;
+    font-size: 12px;
+}
+
+.result-statistics strong {
+    color: white;
+    font-size: 15px;
+}
+
+.result-error-details {
+    margin-top: 22px;
+}
+
+.result-error-details h4 {
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+
+.result-error-details pre {
+    padding: 14px;
+    background-color: #111;
+    color: #fca5a5;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.submission-reference {
+    margin-top: 18px;
+    color: #777;
+    font-size: 11px;
+}
+
+@media (max-width: 600px) {
+    .editor-textarea {
+        min-height: 300px;
+        font-size: 12px;
+    }
+
+    .result-statistics {
+        gap: 20px;
+    }
+}

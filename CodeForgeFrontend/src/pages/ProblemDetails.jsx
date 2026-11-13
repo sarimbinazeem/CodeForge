@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 
 import { getProblem } from "../services/api";
+import CodeEditor from "../components/CodeEditor";
 
 import "./ProblemDetails.css";
 
@@ -145,14 +146,11 @@ function ProblemDetails() {
             </section>
 
             {/* Code Editor Placeholder */}
-            <section className="problem-section editor-placeholder">
+            <section className="problem-section">
 
                 <h2>Your Solution</h2>
 
-                <p>
-                    The C++ code editor and submission functionality
-                    will be available here.
-                </p>
+                <CodeEditor problemID={problem.problemID} />
 
             </section>
 
