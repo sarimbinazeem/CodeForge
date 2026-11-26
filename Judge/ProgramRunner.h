@@ -14,96 +14,98 @@ class ProgramRunner
         string executableFile;
         string inputFile;
         string outputFile;
-        string errorFile;
-        
+        string runtimeErrorFile;
+
     public:
-        ProgramRunner()
+        ProgramRunner(const string& exec = "Judge/Workspace/submission.exe")
         {
-            //Initliaze Folders
-            string workspace = "Judge\\Workspace\\";
-
-            executableFile = workspace + "submission.exe";
-            inputFile = workspace + "input.txt";
-            outputFile = workspace + "output.txt";
-            errorFile = workspace + "runtime_errors.txt";
-        }
-        
-        // Read a file and return its contents.
-        string readFile(string fileName)
-         {
-            ifstream file(fileName);
-        
-            if (!file.is_open())
-            {
-                return "";
-            }
-        
-            string content;
-            string line;
-        
-            while (getline(file, line))
-            {
-                content += line;
-                content += "\n";
-            }
-            file.close();
-            return content;
+            executableFile = exec;
+            inputFile = "Judge/Workspace/input.txt";
+            outputFile = "Judge/Workspace/output.txt";
+            runtimeErrorFile = "Judge/Workspace/runtime_error.txt";
+            filesystem::create_directories("Judge/Workspace");
         }
 
-        bool run(string input, string& output, string& errorMessage)
+        bool run(const string& input, string& output, string& errorMessage)
         {
             output = "";
             errorMessage = "";
-            
-            //check if the file exists
-            if (!filesystem::exists(executableFile))
+
+            // Write input to input file
+            ofstream in(inputFile);
+            if (!in.is_open())
             {
-                errorMessage = "Executable file not found!";
+                errorMessage = "Failed to create input file.";
                 return false;
             }
-
-            // Save input for the submitted program.
-            ofstream inputStream(inputFile);
-            if (!inputStream.is_open())
+            in << input;
+            if (!input.empty() && input.back() != '\n')
             {
-                errorMessage = "Unable to create input file!";
-                return false;
+                in << "\n";
             }
-            inputStream << input;
-            inputStream.close();
+            in.close();
 
-            // Clear old output and error files.
-            ofstream clearOutput(outputFile);
-            clearOutput.close();
+            // Clear output and error files
+            ofstream clearOut(outputFile);
+            clearOut.close();
+            ofstream clearErr(runtimeErrorFile);
+            clearErr.close();
 
-            ofstream clearError(errorFile);
-            clearError.close();
+#ifdef _WIN32
+            // Windows execution: normalize paths with backslashes
+            string cleanExec = executableFile;
+            for (char& c : cleanExec) if (c == '/') c = '\\';
+            string cleanIn = inputFile;
+            for (char& c : cleanIn) if (c == '/') c = '\\';
+            string cleanOut = outputFile;
+            for (char& c : cleanOut) if (c == '/') c = '\\';
+            string cleanErr = runtimeErrorFile;
+            for (char& c : cleanErr) if (c == '/') c = '\\';
 
-            // Run the executable and redirect input/output.
-
+            string command = "\"" + cleanExec + "\" < \"" + cleanIn + "\" > \"" + cleanOut + "\" 2> \"" + cleanErr + "\"";
+            int status = system(command.c_str());
+            int exitCode = status;
+#else
+            // Linux / Unix execution with GNU timeout
             string command =
-                "cmd /C \"\"" + executableFile + "\" < \"" +
-                inputFile + "\" > \"" +
+                "timeout 2s ./" + executableFile +
+                " < \"" + inputFile + "\" > \"" +
                 outputFile + "\" 2> \"" +
-                errorFile + "\"\"";
+                runtimeErrorFile + "\"";
 
+            int status = system(command.c_str());
+            int exitCode = WEXITSTATUS(status);
+#endif
 
-            int result = system(command.c_str());
-
-            // Read whatever the program produced.
-            output = readFile(outputFile);
-            errorMessage = readFile(errorFile);
-
-            if (result != 0)
+            if (exitCode != 0)
             {
-                if (errorMessage.empty())
+                ifstream errFile(runtimeErrorFile);
+                string errLine;
+                string errDetails;
+                while (getline(errFile, errLine))
                 {
-                    errorMessage = "Program terminated with a non-zero exit code.";
-
+                    errDetails += errLine + "\n";
                 }
+                errFile.close();
 
+                errorMessage = !errDetails.empty() ? errDetails : "Runtime Error (Exit code: " + to_string(exitCode) + ")";
                 return false;
             }
+
+            // Read output
+            ifstream outFile(outputFile);
+            if (!outFile.is_open())
+            {
+                errorMessage = "Failed to read program output.";
+                return false;
+            }
+
+            string line;
+            while (getline(outFile, line))
+            {
+                output += line + "\n";
+            }
+            outFile.close();
 
             return true;
         }
