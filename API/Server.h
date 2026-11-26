@@ -57,10 +57,12 @@ class APIServer
             svr.Options(".*", [](const httplib::Request&, httplib::Response& res) {
                 res.status = 204;
             });
+
             // Health check endpoint
             svr.Get("/api/health", [](const httplib::Request&, httplib::Response& res) {
                 res.set_content(R"({"status":"healthy","service":"CodeForge Backend"})", "application/json");
             });
+
             // 1. Core Problems List
             svr.Get("/api/problems", [this](const httplib::Request&, httplib::Response& res) {
                 json response = json::array();

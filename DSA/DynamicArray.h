@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <iostream>
@@ -12,7 +11,6 @@ class DynamicArray
         int size;
         int capacity;
 
-        
     public:
         DynamicArray()
         {
@@ -23,57 +21,56 @@ class DynamicArray
 
         DynamicArray(int initialCapacity)
         {
-            if (initialCapacity < 1){
+            if (initialCapacity < 1)
+            {
                 initialCapacity = 1;
-            }        
+            }
             size = 0;
             capacity = initialCapacity;
             array = new T[capacity];
         }
-        
+
         DynamicArray(const DynamicArray& other)
         {
             size = other.size;
             capacity = other.capacity;
-            
             array = new T[capacity];
-            
+
             for (int i = 0; i < size; i++)
             {
                 array[i] = other.array[i];
             }
         }
-        
+
         DynamicArray& operator=(const DynamicArray& other)
         {
             if (this != &other)
             {
                 T* newArray = new T[other.capacity];
-                
+
                 for (int i = 0; i < other.size; i++)
                 {
                     newArray[i] = other.array[i];
                 }
 
                 delete[] array;
-                
+
                 array = newArray;
                 size = other.size;
                 capacity = other.capacity;
             }
-            
+
             return *this;
         }
-        
+
         ~DynamicArray()
         {
             delete[] array;
         }
-        
+
         void resize()
         {
             int newCapacity = capacity * 2;
-
             T* newArray = new T[newCapacity];
 
             for (int i = 0; i < size; i++)
@@ -136,15 +133,25 @@ class DynamicArray
             return true;
         }
 
-        // Get element at an index
+        // Get element at an index (const)
         T getAt(int index) const
         {
             if (index < 0 || index >= size)
             {
                 return T();
-
             }
 
+            return array[index];
+        }
+
+        // Reference access
+        T& operator[](int index)
+        {
+            return array[index];
+        }
+
+        const T& operator[](int index) const
+        {
             return array[index];
         }
 
@@ -154,7 +161,6 @@ class DynamicArray
             if (index < 0 || index >= size)
             {
                 return false;
-
             }
 
             array[index] = value;
@@ -185,18 +191,17 @@ class DynamicArray
 
             cout << endl;
         }
+
         int getSize() const
         {
             return size;
         }
 
-        
         int getCapacity() const
         {
             return capacity;
         }
 
-    
         bool isEmpty() const
         {
             return size == 0;

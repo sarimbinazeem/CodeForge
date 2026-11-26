@@ -1,168 +1,318 @@
 #pragma once
+
 #include <iostream>
-#include "LinkedList.h"
 using namespace std;
 
 template <typename T>
-class HashTable{
+class LinkedList
+{
     private:
-        struct Entry{
-            int key;
-            T value;
+        struct Node
+        {
+            T data;
+            Node* next;
+            Node* prev;
 
-            Entry():key(0){
-                value = T();
+            Node(T value)
+            {
+                data = value;
+                next = nullptr;
+                prev = nullptr;
             }
-            Entry(int k, T v){
-                key = k;
-                value = v;
-            }      
         };
 
-        LinkedList <Entry>* table;
-        int capacity;
+        Node* head;
+        Node* tail;
         int size;
 
+        // Navigation cursor for history browsing
+        Node* cursor;
+
     public:
-
-        HashTable()
+        // Constructor
+        LinkedList()
         {
-            capacity = 10;
+            head = nullptr;
+            tail = nullptr;
             size = 0;
-
-            table = new LinkedList<Entry>[capacity];
+            cursor = nullptr;
         }
 
-        // Prevent unsafe copying
-        HashTable(const HashTable&) = delete;
-        HashTable& operator=(const HashTable&) = delete;       
-        
-        ~HashTable()
+        // Deep copy constructor
+        LinkedList(const LinkedList& other)
         {
-            delete[] table;
-        }        
+            head = nullptr;
+            tail = nullptr;
+            size = 0;
+            cursor = nullptr;
 
-        //hash function for index
-        int hashFunction(int key) const{
-            int index = key % capacity;
-            if(index < 0 ){
-                index += capacity;
-            }
-            return index;
-        }
-
-        //resizing and rehasing all the entries
-        void resize()
-        {
-            int newCap = capacity *2;
-            LinkedList <Entry> * newTable = new LinkedList<Entry>[newCap];
-
-            for(int i = 0 ; i<capacity ; i++)
+            Node* current = other.head;
+            while (current != nullptr)
             {
-                for(int j = 0 ; j < table[i].getSize() ; j++){
-                    Entry entry = table[i].getAt(j); //get entry of that linked list
-                    int newIdx = entry.key % newCap;
-                    if(newIdx < 0){
-                        newIdx += newCap;
-                    }
-
-                    //put that entry at new HASHED index
-                    newTable[newIdx].insertAtEnd(entry);
-                }
+                insertAtEnd(current->data);
+                current = current->next;
             }
-            delete[] table;
-
-            table = newTable;
-            capacity = newCap;
         }
 
-        void insert(int key, T value)
+        // Deep copy assignment operator
+        LinkedList& operator=(const LinkedList& other)
         {
-            int index = hashFunction(key);
-
-            // Update if the key already exists
-            for (int i = 0; i < table[index].getSize(); i++)
+            if (this != &other)
             {
-                Entry entry = table[index].getAt(i);
-
-                if (entry.key == key)
+                clear();
+                Node* current = other.head;
+                while (current != nullptr)
                 {
-                    table[index].deleteAt(i);
-                    table[index].insertAt(i, Entry(key, value));
-
-                    cout << "Value updated successfully!\n";
-                    return;
+                    insertAtEnd(current->data);
+                    current = current->next;
                 }
             }
+            return *this;
+        }
 
-            // Insert new entry
-            table[index].insertAtEnd(Entry(key, value));
+        // Destructor
+        ~LinkedList()
+        {
+            clear();
+        }
+
+        void insertAtBeginning(T value)
+        {
+            Node* newNode = new Node(value);
+
+            if (head == nullptr)
+            {
+                head = newNode;
+                tail = newNode;
+            }
+            else
+            {
+                newNode->next = head;
+                head->prev = newNode;
+                head = newNode;
+            }
+
             size++;
-            // Check load factor
-            if ((double)size / capacity > 0.75)
+            if (cursor == nullptr)
             {
-                resize();
+                cursor = head;
             }
         }
 
-        bool search(int key,T& result) const
+        void insertAtEnd(T value)
         {
-            int index = hashFunction(key);
+            Node* newNode = new Node(value);
 
-            for (int i = 0; i < table[index].getSize(); i++)
+            if (head == nullptr)
             {
-                Entry entry = table[index].getAt(i);
+                head = newNode;
+                tail = newNode;
+            }
+            else
+            {
+                tail->next = newNode;
+                newNode->prev = tail;
+                tail = newNode;
+            }
 
-                if (entry.key == key)
+            size++;
+            if (cursor == nullptr)
+            {
+                cursor = tail;
+            }
+        }
+
+        // Insert at a specific index
+        bool insertAt(int index, T value)
+        {
+            if (index < 0 || index > size)
+                return false;
+
+            if (index == 0)
+            {
+                insertAtBeginning(value);
+                return true;
+            }
+
+            if (index == size)
+            {
+                insertAtEnd(value);
+                return true;
+            }
+
+            Node* current = head;
+            for (int i = 0; i < index - 1; i++)
+            {
+                current = current->next;
+            }
+
+            Node* newNode = new Node(value);
+            newNode->next = current->next;
+            newNode->prev = current;
+            if (current->next != nullptr)
+            {
+                current->next->prev = newNode;
+            }
+            current->next = newNode;
+
+            size++;
+            return true;
+        }
+
+        // Delete first node
+        bool deleteFromBeginning()
+        {
+            if (head == nullptr)
+                return false;
+
+            Node* temp = head;
+            head = head->next;
+
+            if (head != nullptr)
+            {
+                head->prev = nullptr;
+            }
+            else
+            {
+                tail = nullptr;
+            }
+
+            if (cursor == temp)
+            {
+                cursor = head;
+            }
+
+            delete temp;
+            size--;
+            return true;
+        }
+
+        bool deleteFromEnd()
+        {
+            if (head == nullptr)
+                return false;
+
+            if (head == tail)
+            {
+                if (cursor == head)
                 {
-                    result = entry.value;
-                    return true;
+                    cursor = nullptr;
                 }
+                delete head;
+                head = nullptr;
+                tail = nullptr;
+            }
+            else
+            {
+                Node* temp = tail;
+                tail = tail->prev;
+                tail->next = nullptr;
+
+                if (cursor == temp)
+                {
+                    cursor = tail;
+                }
+
+                delete temp;
+            }
+
+            size--;
+            return true;
+        }
+
+        bool deleteAt(int index)
+        {
+            if (index < 0 || index >= size)
+                return false;
+
+            if (index == 0)
+            {
+                return deleteFromBeginning();
+            }
+
+            if (index == size - 1)
+            {
+                return deleteFromEnd();
+            }
+
+            Node* current = head;
+            for (int i = 0; i < index; i++)
+            {
+                current = current->next;
+            }
+
+            if (cursor == current)
+            {
+                cursor = current->next != nullptr ? current->next : current->prev;
+            }
+
+            current->prev->next = current->next;
+            current->next->prev = current->prev;
+
+            delete current;
+            size--;
+            return true;
+        }
+
+        bool search(T value) const
+        {
+            Node* current = head;
+            while (current != nullptr)
+            {
+                if (current->data == value)
+                    return true;
+
+                current = current->next;
             }
 
             return false;
         }
-
-        // Delete an entry
-        bool remove(int key)
-        {
-            int index = hashFunction(key);
-
-            for (int i = 0; i < table[index].getSize(); i++)
-            {
-                Entry entry = table[index].getAt(i);
-
-                if (entry.key == key)
-                {
-                    table[index].deleteAt(i);
-                    size--;
-
-                    return true;
-                }
-            }
-
-            return false;
-        }        
 
         void display() const
         {
-            for (int i = 0; i < capacity; i++)
+            Node* current = head;
+            while (current != nullptr)
             {
-                cout << "[" << i << "] ";
+                cout << current->data << " -> ";
+                current = current->next;
+            }
 
-                for (int j = 0; j < table[i].getSize(); j++)
-                {
-                    Entry entry = table[i].getAt(j);
+            cout << "NULL" << endl;
+        }
 
-                    cout << "(" << entry.key << ", " << entry.value << ") -> ";
-                }
-                cout << "NULL\n";
+        // Reverse the linked list
+        void reverse()
+        {
+            Node* current = head;
+            Node* temp = nullptr;
+
+            while (current != nullptr)
+            {
+                temp = current->prev;
+                current->prev = current->next;
+                current->next = temp;
+                current = current->prev;
+            }
+
+            if (temp != nullptr)
+            {
+                tail = head;
+                head = temp->prev;
             }
         }
 
-        bool isEmpty() const
+        T getAt(int index) const
         {
-            return size == 0;
+            if (index < 0 || index >= size)
+                return T();
+
+            Node* current = head;
+            for (int i = 0; i < index; i++)
+            {
+                current = current->next;
+            }
+
+            return current->data;
         }
 
         int getSize() const
@@ -170,23 +320,79 @@ class HashTable{
             return size;
         }
 
-        int getCapacity() const
+        bool isEmpty() const
         {
-            return capacity;
-        }
-
-        double getLoadFactor() const
-        {
-            return (double)size / capacity;
+            return head == nullptr;
         }
 
         void clear()
         {
-            delete[] table;
+            Node* current = head;
+            while (current != nullptr)
+            {
+                Node* temp = current;
+                current = current->next;
+                delete temp;
+            }
 
-            capacity = 10;
+            head = nullptr;
+            tail = nullptr;
+            cursor = nullptr;
             size = 0;
+        }
 
-            table = new LinkedList<Entry>[capacity];
-        }   
+        // ===== NAVIGATION CURSOR API (Submission History) =====
+        void resetCursorToBeginning()
+        {
+            cursor = head;
+        }
+
+        void resetCursorToEnd()
+        {
+            cursor = tail;
+        }
+
+        bool hasCursorCurrent() const
+        {
+            return cursor != nullptr;
+        }
+
+        bool hasCursorNext() const
+        {
+            return cursor != nullptr && cursor->next != nullptr;
+        }
+
+        bool hasCursorPrev() const
+        {
+            return cursor != nullptr && cursor->prev != nullptr;
+        }
+
+        bool moveCursorNext()
+        {
+            if (hasCursorNext())
+            {
+                cursor = cursor->next;
+                return true;
+            }
+            return false;
+        }
+
+        bool moveCursorPrev()
+        {
+            if (hasCursorPrev())
+            {
+                cursor = cursor->prev;
+                return true;
+            }
+            return false;
+        }
+
+        T getCursorData() const
+        {
+            if (cursor != nullptr)
+            {
+                return cursor->data;
+            }
+            return T();
+        }
 };

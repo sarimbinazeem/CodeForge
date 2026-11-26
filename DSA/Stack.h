@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <iostream>
@@ -7,6 +6,7 @@ using namespace std;
 
 /*
 Applying Stack through Linked List
+Used for Code Undo/Redo System (Feature 3)
 */
 
 template <typename T>
@@ -16,6 +16,7 @@ private:
     LinkedList<T> list;
 
 public:
+    Stack() {}
 
     // Push an element onto the stack
     void push(T value)
@@ -23,16 +24,14 @@ public:
         list.insertAtBeginning(value);
     }
 
-    // Remove the top element  (Last in first out)
+    // Remove the top element (LIFO)
     T pop()
     {
         if (list.isEmpty())
             return T();
 
         T value = list.getAt(0);
-
         list.deleteFromBeginning();
-
         return value;
     }
 
@@ -42,11 +41,8 @@ public:
         if (list.isEmpty())
             return T();
 
-        T value = list.getAt(0);
-
-        return value;
+        return list.getAt(0);
     }
-
 
     bool isEmpty() const
     {
