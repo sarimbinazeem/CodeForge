@@ -4,6 +4,16 @@ import { getProblem, getProblemProgression } from "../services/api";
 import CodeEditor from "../components/CodeEditor";
 import "./ProblemDetails.css";
 
+function getNormalizedRating(problem) {
+    const diff = (problem?.difficulty || "").toLowerCase();
+    const raw = Number(problem?.rating || 0);
+    if (raw >= 800 && raw <= 2500) return raw;
+    const id = problem?.problemID || 1;
+    if (diff === "hard") return 1750 + (id % 30) * 10;
+    if (diff === "medium") return 1350 + (id % 25) * 10;
+    return 850 + (id % 35) * 10;
+}
+
 function ProblemDetails() {
     const { id } = useParams();
     const [problem, setProblem] = useState(null);
@@ -63,6 +73,8 @@ function ProblemDetails() {
 
     if (!problem) return null;
 
+    const cleanRating = getNormalizedRating(problem);
+
     return (
         <div className="problem-workspace-container">
             {/* Top Workspace Bar */}
@@ -76,11 +88,11 @@ function ProblemDetails() {
                 </div>
 
                 <div className="workspace-nav-badges">
-                    <span className={`diff-badge ${problem.difficulty.toLowerCase()}`}>
-                        {problem.difficulty}
+                    <span className={`diff-badge ${(problem.difficulty || (cleanRating <= 1300 ? "Easy" : cleanRating <= 1650 ? "Medium" : "Hard")).toLowerCase()}`}>
+                        {problem.difficulty || (cleanRating <= 1300 ? "Easy" : cleanRating <= 1650 ? "Medium" : "Hard")}
                     </span>
                     <span className="topic-badge">{problem.topic}</span>
-                    <span className="rating-badge">★ Rating: {problem.rating || 1000}</span>
+                    <span className="rating-badge">★ Rating: {cleanRating}</span>
                 </div>
             </div>
 
@@ -168,7 +180,7 @@ function ProblemDetails() {
                                         </div>
                                         <div className="meta-item">
                                             <span>Difficulty Rating</span>
-                                            <strong>{problem.rating || 1000}</strong>
+                                            <strong>{cleanRating}</strong>
                                         </div>
                                         <div className="meta-item">
                                             <span>Execution Time Limit</span>

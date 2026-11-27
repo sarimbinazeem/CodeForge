@@ -4,6 +4,16 @@ import { getRoadmap, getSkills, completeSkill, getRecommendedProblems } from "..
 import { getStoredLeaderboard, getCurrentUsername } from "../services/leaderboardStorage";
 import "./Home.css";
 
+function getNormalizedRating(step) {
+    const diff = (step?.difficulty || "").toLowerCase();
+    const raw = Number(step?.rating || 0);
+    if (raw >= 800 && raw <= 2500) return raw;
+    const id = step?.problemID || 1;
+    if (diff === "hard") return 1750 + (id % 30) * 10;
+    if (diff === "medium") return 1350 + (id % 25) * 10;
+    return 850 + (id % 35) * 10;
+}
+
 function Home() {
     const [leaderboard, setLeaderboard] = useState([]);
     const [roadmap, setRoadmap] = useState([]);
@@ -79,15 +89,15 @@ function Home() {
 
             {loading ? (
                 <div className="dashboard-loading">
-                    <p>Loading CodeForge system features from C++ backend...</p>
+                    <p>Loading CodeForge system from C++ backend...</p>
                 </div>
             ) : (
                 <div className="dashboard-grid">
-                    {/* Feature 6: Heap — Live Leaderboard Card */}
+                    {/* Live Leaderboard Card */}
                     <div className="dashboard-card leaderboard-card">
                         <div className="card-header">
                             <h2>Live Leaderboard</h2>
-                            <span className="badge heap-badge">Feature 6: MaxHeap</span>
+                            <span className="badge heap-badge">MaxHeap Priority Queue</span>
                         </div>
                         <p className="card-desc">Top coders ranked by score and solved count via custom MaxHeap priority queue.</p>
 
@@ -117,11 +127,11 @@ function Home() {
                         </div>
                     </div>
 
-                    {/* Feature 7: BST — Learning Roadmap Card */}
+                    {/* Learning Roadmap Card */}
                     <div className="dashboard-card roadmap-card">
                         <div className="card-header">
                             <h2>Learning Roadmap</h2>
-                            <span className="badge bst-badge">Feature 7: BST</span>
+                            <span className="badge bst-badge">BST In-Order Traversal</span>
                         </div>
                         <p className="card-desc">Step-by-step problem sequence ordered by difficulty rating via BST In-Order traversal.</p>
 
@@ -129,27 +139,31 @@ function Home() {
                             {roadmap.length === 0 ? (
                                 <p className="empty-hint">No roadmap steps found in database.</p>
                             ) : (
-                                roadmap.slice(0, 5).map((step, idx) => (
-                                    <Link key={step?.problemID || idx} to={`/problems/${step?.problemID}`} className="roadmap-step-item">
-                                        <span className="step-num">Step {idx + 1}</span>
-                                        <div className="step-details">
-                                            <strong>{step?.title || "Challenge"}</strong>
-                                            <span>{step?.topic || "General"} &bull; Rating {step?.rating || 1000}</span>
-                                        </div>
-                                        <span className={`step-diff ${(step?.difficulty || "easy").toLowerCase()}`}>
-                                            {step?.difficulty || "Easy"}
-                                        </span>
-                                    </Link>
-                                ))
+                                roadmap.slice(0, 5).map((step, idx) => {
+                                    const cleanRating = getNormalizedRating(step);
+                                    const cleanDiff = step?.difficulty || (cleanRating <= 1300 ? "Easy" : cleanRating <= 1650 ? "Medium" : "Hard");
+                                    return (
+                                        <Link key={step?.problemID || idx} to={`/problems/${step?.problemID}`} className="roadmap-step-item">
+                                            <span className="step-num">Step {idx + 1}</span>
+                                            <div className="step-details">
+                                                <strong>{step?.title || "Challenge"}</strong>
+                                                <span>{step?.topic || "General"} &bull; Rating {cleanRating}</span>
+                                            </div>
+                                            <span className={`step-diff ${cleanDiff.toLowerCase()}`}>
+                                                {cleanDiff}
+                                            </span>
+                                        </Link>
+                                    );
+                                })
                             )}
                         </div>
                     </div>
 
-                    {/* Feature 8: Graph — Skill Dependency System Card */}
+                    {/* Skill Dependency System Card */}
                     <div className="dashboard-card skills-card full-width">
                         <div className="card-header">
                             <h2>Skill Dependency System</h2>
-                            <span className="badge graph-badge">Feature 8: Graph DAG</span>
+                            <span className="badge graph-badge">Directed Acyclic Graph</span>
                         </div>
                         <p className="card-desc">Prerequisite topics unlock as you progress through foundational concepts.</p>
 

@@ -1,8 +1,20 @@
 import { Link } from "react-router-dom";
 import "./ProblemCard.css";
 
+function getNormalizedRating(problem) {
+    const diff = (problem?.difficulty || "").toLowerCase();
+    const raw = Number(problem?.rating || 0);
+    if (raw >= 800 && raw <= 2500) return raw;
+    const id = problem?.problemID || 1;
+    if (diff === "hard") return 1750 + (id % 30) * 10;
+    if (diff === "medium") return 1350 + (id % 25) * 10;
+    return 850 + (id % 35) * 10;
+}
+
 function ProblemCard({ problem }) {
-    const diffClass = (problem.difficulty || "easy").toLowerCase();
+    const cleanRating = getNormalizedRating(problem);
+    const cleanDiff = problem?.difficulty || (cleanRating <= 1300 ? "Easy" : cleanRating <= 1650 ? "Medium" : "Hard");
+    const diffClass = cleanDiff.toLowerCase();
 
     return (
         <div className="problem-card">
@@ -22,18 +34,16 @@ function ProblemCard({ problem }) {
 
                 <div className="problem-tags-row">
                     <span className={`diff-pill ${diffClass}`}>
-                        {problem.difficulty}
+                        {cleanDiff}
                     </span>
 
                     <span className="topic-pill">
                         {problem.topic}
                     </span>
 
-                    {problem.rating && (
-                        <span className="rating-pill">
-                            ★ {problem.rating}
-                        </span>
-                    )}
+                    <span className="rating-pill">
+                        ★ {cleanRating}
+                    </span>
 
                     <span className="test-count-pill">
                         {problem.testCaseCount || 0} Test Cases
