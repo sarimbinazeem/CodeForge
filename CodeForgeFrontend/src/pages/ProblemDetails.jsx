@@ -1,161 +1,132 @@
-
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-
-import { getProblem } from "../services/api";
+import { getProblem, getProblemProgression } from "../services/api";
 import CodeEditor from "../components/CodeEditor";
-
 import "./ProblemDetails.css";
 
 function ProblemDetails() {
-
-    // Get problem ID from the URL
     const { id } = useParams();
-
     const [problem, setProblem] = useState(null);
+    const [progression, setProgression] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // Fetch the selected problem
-    useEffect(() => {
+    async function fetchData() {
+        try {
+            setLoading(true);
+            setError("");
 
-        async function fetchProblem() {
+            const [problemData, progData] = await Promise.all([
+                getProblem(id),
+                getProblemProgression(id).catch(() => null)
+            ]);
 
-            try {
-                setLoading(true);
-                setError("");
-
-                const data = await getProblem(id);
-
-                setProblem(data);
-            }
-            catch (err) {
-                setError(err.message);
-            }
-            finally {
-                setLoading(false);
-            }
-
+            setProblem(problemData);
+            setProgression(progData);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
+    }
 
-        fetchProblem();
-
+    useEffect(() => {
+        fetchData();
     }, [id]);
 
     if (loading) {
         return (
-            <div className="details-message">
-                Loading problem...
+            <div className="details-state-wrapper">
+                <div className="spinner"></div>
+                <p>Loading problem workspace...</p>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="details-message error-message">
-
-                <h2>Unable to load problem</h2>
-
+            <div className="details-state-wrapper error">
+                <h2>Problem Not Found</h2>
                 <p>{error}</p>
-
-                <Link to="/problems">
-                    Back to Problems
-                </Link>
-
+                <Link to="/problems" className="back-btn">&larr; Back to Problem Explorer</Link>
             </div>
         );
     }
 
-    if (!problem) {
-        return null;
-    }
+    if (!problem) return null;
 
     return (
-
-        <div className="problem-details-page">
-
-            {/* Navigation */}
-            <Link to="/problems" className="back-link">
-                &larr; Back to Problems
-            </Link>
-
-            {/* Problem Header */}
-            <div className="details-header">
-
-                <div className="details-title">
-
-                    <span className="details-id">
-                        Problem #{problem.problemID}
-                    </span>
-
-                    <h1>{problem.title}</h1>
-
-                </div>
-
-                <div className="details-tags">
-
-                    <span
-                        className={`difficulty ${problem.difficulty.toLowerCase()}`}
-                    >
-                        {problem.difficulty}
-                    </span>
-
-                    <span className="topic-tag">
-                        {problem.topic}
-                    </span>
-
-                </div>
-
+        <div className="problem-workspace-layout">
+            {/* Top breadcrumb navigation */}
+            <div className="workspace-top-bar">
+                <Link to="/problems" className="workspace-back-link">
+                    &larr; Problems
+                </Link>
+                <span className="breadcrumb-separator">/</span>
+                <span className="breadcrumb-current">#{problem.problemID} {problem.title}</span>
             </div>
 
-            {/* Problem Description */}
-            <section className="problem-section">
+            <div className="workspace-split">
+                {/* Left Pane: Problem Description & History */}
+                <div className="workspace-left-pane">
+                    <div className="problem-main-card">
+                        <div className="problem-header-row">
+                            <h1 className="problem-title">
+                                <span className="problem-number">#{problem.problemID}.</span> {problem.title}
+                            </h1>
+                        </div>
 
-                <h2>Description</h2>
+                        <div className="problem-badge-row">
+                            <span className={`pill-difficulty ${problem.difficulty.toLowerCase()}`}>
+                                {problem.difficulty}
+                            </span>
+                            <span className="pill-topic">{problem.topic}</span>
+                            <span className="pill-rating">★ Rating: {problem.rating || 1000}</span>
+                            <span className="pill-tests">{problem.testCaseCount} Test Cases</span>
+                        </div>
 
-                <p className="problem-full-description">
-                    {problem.description}
-                </p>
+                        <hr className="divider" />
 
-            </section>
+                        <div className="problem-body">
+                            <h3>Description</h3>
+                            <div className="description-text">
+                                {problem.description}
+                            </div>
+                        </div>
 
-            {/* Problem Information */}
-            <section className="problem-section">
+                        {/* Feature 2: Linked List — Attempt Progression Timeline */}
+                        {progression && progression.totalAttempts > 0 && (
+                            <div className="progression-card">
+                                <div className="progression-head">
+                                    <h4>Your Submission History (Linked List)</h4>
+                                    <span className={`status-tag ${progression.isSolved ? "solved" : "attempted"}`}>
+                                        {progression.isSolved ? "✓ Accepted" : "In Progress"}
+                                    </span>
+                                </div>
 
-                <h2>Problem Information</h2>
-
-                <div className="problem-information">
-
-                    <div className="information-item">
-                        <span>Difficulty</span>
-                        <strong>{problem.difficulty}</strong>
+                                <div className="progression-list">
+                                    {progression.attempts.map((att, idx) => (
+                                        <div key={att.submissionID || idx} className="progression-row">
+                                            <span className="prog-idx">#{idx + 1}</span>
+                                            <span className={`prog-verdict ${att.status.toLowerCase().replace(/\s+/g, "-")}`}>
+                                                {att.status}
+                                            </span>
+                                            <span className="prog-lang">{att.language}</span>
+                                            <span className="prog-id">Sub #{att.submissionID}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
-
-                    <div className="information-item">
-                        <span>Topic</span>
-                        <strong>{problem.topic}</strong>
-                    </div>
-
-                    <div className="information-item">
-                        <span>Test Cases</span>
-                        <strong>{problem.testCaseCount}</strong>
-                    </div>
-
                 </div>
 
-            </section>
-
-            {/* Code Editor Placeholder */}
-            <section className="problem-section">
-
-                <h2>Your Solution</h2>
-
-                <CodeEditor problemID={problem.problemID} />
-
-            </section>
-
+                {/* Right Pane: VS Code Code Editor IDE */}
+                <div className="workspace-right-pane">
+                    <CodeEditor problemID={problem.problemID} />
+                </div>
+            </div>
         </div>
-
     );
 }
 

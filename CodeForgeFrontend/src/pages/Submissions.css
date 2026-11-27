@@ -1,8 +1,7 @@
-
 .submissions-page {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 45px 25px;
+    padding: 36px 30px;
 }
 
 .submissions-header {
@@ -10,44 +9,132 @@
     justify-content: space-between;
     align-items: center;
     gap: 20px;
-    margin-bottom: 35px;
+    margin-bottom: 24px;
 }
 
 .submissions-header h1 {
-    font-size: 30px;
-    margin-bottom: 10px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 6px 0;
 }
 
 .submissions-header p {
-    color: #999;
+    color: #94a3b8;
     font-size: 14px;
+    margin: 0;
 }
 
 .submission-count {
-    min-width: 150px;
-    padding: 16px 20px;
-    background-color: #1b1b1b;
-    border: 1px solid #303030;
-    border-radius: 8px;
+    padding: 10px 18px;
+    background-color: #16181d;
+    border: 1px solid #232733;
+    border-radius: 6px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 2px;
 }
 
 .submission-count span {
-    color: #999;
-    font-size: 12px;
+    color: #64748b;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 600;
 }
 
 .submission-count strong {
-    font-size: 23px;
+    font-size: 20px;
+    color: #f1f5f9;
+}
+
+/* Feature 4: Queue Control Card */
+.queue-control-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    background-color: #16181d;
+    border: 1px solid #232733;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.queue-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.queue-label {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.queue-badge {
+    background-color: #1e3a5f;
+    border: 1px solid #2b6cb0;
+    color: #90cdf4;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.queue-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.queue-btn {
+    background-color: #1e222d;
+    border: 1px solid #2e3547;
+    color: #cbd5e1;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.15s ease;
+}
+
+.queue-btn:hover:not(:disabled) {
+    background-color: #2b3242;
+    color: #ffffff;
+}
+
+.queue-btn.primary {
+    background-color: #4f46e5;
+    border-color: #6366f1;
+    color: white;
+}
+
+.queue-btn.primary:hover:not(:disabled) {
+    background-color: #4338ca;
+}
+
+.queue-btn.refresh {
+    background-color: transparent;
+    border-color: #334155;
+    color: #94a3b8;
+}
+
+.queue-btn.refresh:hover {
+    color: #ffffff;
+    border-color: #64748b;
+}
+
+.queue-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
 }
 
 .submissions-table-container {
     overflow-x: auto;
-    background-color: #181818;
-    border: 1px solid #303030;
-    border-radius: 9px;
+    background-color: #16181d;
+    border: 1px solid #232733;
+    border-radius: 8px;
 }
 
 .submissions-table {
@@ -57,122 +144,116 @@
 }
 
 .submissions-table th {
-    padding: 17px 20px;
-    background-color: #202020;
-    color: #999;
-    font-size: 12px;
-    font-weight: 600;
+    padding: 14px 18px;
+    background-color: #1a1e27;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #232733;
 }
 
 .submissions-table td {
-    padding: 18px 20px;
-    border-top: 1px solid #2b2b2b;
-    color: #ddd;
+    padding: 14px 18px;
+    border-bottom: 1px solid #1f232e;
+    color: #cbd5e1;
     font-size: 13px;
 }
 
+.submissions-table tr:hover {
+    background-color: #1b1e25;
+}
+
 .submission-id {
-    color: #aaa !important;
+    color: #64748b !important;
     font-family: Consolas, monospace;
+    font-weight: 600;
 }
 
 .problem-link {
-    color: #e5e5e5;
+    color: #f1f5f9;
     text-decoration: none;
+    font-weight: 600;
+    transition: color 0.15s ease;
 }
 
 .problem-link:hover {
-    color: #ef4444;
+    color: #818cf8;
 }
 
 .submission-status {
     display: inline-block;
-    padding: 6px 10px;
-    border-radius: 5px;
-    background-color: #303030;
-    color: #ddd;
+    padding: 3px 8px;
+    border-radius: 4px;
     font-size: 11px;
     font-weight: 700;
 }
 
 .submission-status.accepted {
-    background-color: #153522;
-    color: #4ade80;
+    background-color: #064e3b;
+    color: #34d399;
 }
 
 .submission-status.wrong-answer,
 .submission-status.compilation-error,
-.submission-status.runtime-error {
-    background-color: #3a1d20;
+.submission-status.runtime-error,
+.submission-status.time-limit-exceeded {
+    background-color: #450a0a;
     color: #f87171;
 }
 
+.submission-status.queued,
 .submission-status.pending,
-.submission-status.compiling {
-    background-color: #3b321b;
-    color: #facc15;
+.submission-status.running {
+    background-color: #3f2d12;
+    color: #fde047;
 }
 
 .submissions-message,
 .submissions-empty {
-    padding: 45px 20px;
+    padding: 60px 20px;
     text-align: center;
-    background-color: #181818;
-    border: 1px solid #303030;
-    border-radius: 9px;
-    color: #aaa;
-}
-
-.submissions-message.error {
-    color: #f87171;
-}
-
-.submissions-message button {
-    margin-top: 15px;
-    padding: 9px 15px;
-    background-color: #b20710;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    background-color: #16181d;
+    border: 1px solid #232733;
+    border-radius: 8px;
+    color: #94a3b8;
 }
 
 .submissions-empty h2 {
-    color: white;
-    margin-bottom: 10px;
+    color: #ffffff;
+    font-size: 20px;
+    margin-bottom: 8px;
 }
 
 .submissions-empty p {
     margin-bottom: 20px;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .submissions-empty a {
     display: inline-block;
-    padding: 10px 16px;
-    background-color: #b20710;
+    padding: 10px 20px;
+    background-color: #4f46e5;
     color: white;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: 6px;
     font-size: 13px;
+    font-weight: 600;
 }
 
-@media (max-width: 650px) {
+@media (max-width: 768px) {
     .submissions-header {
         align-items: flex-start;
         flex-direction: column;
     }
 
-    .submission-count {
-        width: 100%;
+    .queue-control-card {
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    .submissions-page {
-        padding: 30px 15px;
-    }
-
-    .submissions-header h1 {
-        font-size: 25px;
+    .queue-actions {
+        flex-direction: column;
     }
 }
