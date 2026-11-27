@@ -8,6 +8,7 @@
 #include "../Managers/ProblemManager.h"
 #include "../Models/Submission.h"
 #include "../Managers/SubmissionManager.h"
+#include "../Managers/LeaderboardManager.h"
 
 using namespace std;
 
@@ -22,12 +23,14 @@ class StorageManager
     private:
         string problemFile;
         string submissionFile;
+        string leaderboardFile;
 
     public:
         StorageManager()
         {
             problemFile = "Storage/problems.dat";
             submissionFile = "Storage/submissions.dat";
+            leaderboardFile = "Storage/leaderboard.dat";
             filesystem::create_directories("Storage");
         }
 
@@ -225,6 +228,62 @@ class StorageManager
                 {
                     cout << "Submission ID " << submissionID << " already exists. Skipping.\n";
                 }
+            }
+
+            file.close();
+            return true;
+        }
+
+        // Save leaderboard data
+        bool saveLeaderboard(const LeaderboardManager& manager)
+        {
+            ofstream file(leaderboardFile, ios::binary);
+            if (!file.is_open()) return false;
+
+            int count = manager.getUserCount();
+            file.write((char*)&count, sizeof(count));
+
+            for (int i = 0; i < count; i++)
+            {
+                User u = manager.getUserAt(i);
+                int uid = u.getUserID();
+                int score = u.getScore();
+                int solved = u.getSolvedCount();
+                int attempts = u.getAttemptCount();
+
+                file.write((char*)&uid, sizeof(uid));
+                writeString(file, u.getUsername());
+                file.write((char*)&score, sizeof(score));
+                file.write((char*)&solved, sizeof(solved));
+                file.write((char*)&attempts, sizeof(attempts));
+            }
+
+            file.close();
+            return !file.fail();
+        }
+
+        // Load leaderboard data
+        bool loadLeaderboard(LeaderboardManager& manager)
+        {
+            ifstream file(leaderboardFile, ios::binary);
+            if (!file.is_open()) return false;
+
+            int count;
+            if (!file.read((char*)&count, sizeof(count))) return false;
+            if (count < 0 || count > 100000) return false;
+
+            for (int i = 0; i < count; i++)
+            {
+                int uid, score, solved, attempts;
+                string uname;
+
+                if (!file.read((char*)&uid, sizeof(uid))) return false;
+                if (!readString(file, uname)) return false;
+                if (!file.read((char*)&score, sizeof(score))) return false;
+                if (!file.read((char*)&solved, sizeof(solved))) return false;
+                if (!file.read((char*)&attempts, sizeof(attempts))) return false;
+
+                manager.registerUser(uid, uname, score, solved, attempts);
             }
 
             file.close();

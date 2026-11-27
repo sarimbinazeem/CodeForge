@@ -1,16 +1,22 @@
-// ================= REAL LEADERBOARD & USER PERSISTENCE (localStorage) =================
+// ================= REAL LEADERBOARD & USER PERSISTENCE (localStorage & C++ Server) =================
+import { registerUserOnServer } from "./api";
 
 const STORAGE_KEY_USER = "codeforge_username";
 const STORAGE_KEY_USER_ID = "codeforge_user_id";
 const STORAGE_KEY_LEADERBOARD = "codeforge_live_leaderboard";
 
-const INITIAL_COMPETITORS = [
-    { userID: 104, username: "elena_algo", score: 850, solvedCount: 8, attemptCount: 9 },
-    { userID: 102, username: "alex_chen", score: 650, solvedCount: 6, attemptCount: 7 },
-    { userID: 105, username: "marcus_vance", score: 500, solvedCount: 5, attemptCount: 6 },
-    { userID: 101, username: "sarah_j", score: 350, solvedCount: 3, attemptCount: 4 },
-    { userID: 103, username: "david_kim", score: 200, solvedCount: 2, attemptCount: 4 }
-];
+// List of any previously seeded fake names to strictly purge
+const FAKE_NAMES = new Set([
+    "elena_algo",
+    "alex_chen",
+    "marcus_vance",
+    "sarah_j",
+    "david_kim",
+    "alex_code",
+    "sarah_dsa",
+    "kevin_cpp",
+    "coder_pro"
+]);
 
 // Initialize and get the current user's handle
 export function getCurrentUsername() {
@@ -24,14 +30,38 @@ export function getCurrentUsername() {
 export function setCurrentUsername(name) {
     if (!name || !name.trim()) return;
     const cleanName = name.trim();
+    const oldName = localStorage.getItem(STORAGE_KEY_USER);
     localStorage.setItem(STORAGE_KEY_USER, cleanName);
+
+    // Register with central C++ server for cross-device shared leaderboard
+    registerUserOnServer(cleanName).then((res) => {
+        if (res?.userID) {
+            localStorage.setItem(STORAGE_KEY_USER_ID, String(res.userID));
+        }
+    }).catch(() => null);
 
     // Ensure user ID exists
     if (!localStorage.getItem(STORAGE_KEY_USER_ID)) {
         localStorage.setItem(STORAGE_KEY_USER_ID, String(Math.floor(Date.now() % 100000)));
     }
 
-    // Ensure user is on the leaderboard
+    // Rename existing user entry in leaderboard rather than duplicating
+    const uid = getCurrentUserID();
+    let data = localStorage.getItem(STORAGE_KEY_LEADERBOARD);
+    if (data) {
+        try {
+            let list = JSON.parse(data);
+            const idx = list.findIndex(
+                (u) => u.userID === uid || (oldName && u.username.toLowerCase() === oldName.toLowerCase())
+            );
+            if (idx !== -1) {
+                list[idx].username = cleanName;
+                list[idx].userID = uid;
+                localStorage.setItem(STORAGE_KEY_LEADERBOARD, JSON.stringify(list));
+            }
+        } catch {}
+    }
+
     syncUserToLeaderboard(cleanName);
 }
 
@@ -44,7 +74,7 @@ export function getCurrentUserID() {
     return parseInt(uid, 10);
 }
 
-// Get the full sorted live leaderboard
+// Get the full sorted live leaderboard - contains ONLY real users
 export function getStoredLeaderboard() {
     let data = localStorage.getItem(STORAGE_KEY_LEADERBOARD);
     let list = [];
@@ -53,17 +83,20 @@ export function getStoredLeaderboard() {
         try {
             list = JSON.parse(data);
         } catch {
-            list = [...INITIAL_COMPETITORS];
+            list = [];
         }
-    } else {
-        list = [...INITIAL_COMPETITORS];
     }
+
+    // Purge any old fake demo names
+    list = list.filter((u) => !FAKE_NAMES.has((u.username || "").toLowerCase()));
 
     // Ensure active user is present
     const username = getCurrentUsername();
     if (username) {
         const uid = getCurrentUserID();
-        const existingIdx = list.findIndex((u) => u.userID === uid || u.username.toLowerCase() === username.toLowerCase());
+        const existingIdx = list.findIndex(
+            (u) => u.userID === uid || u.username.toLowerCase() === username.toLowerCase()
+        );
         if (existingIdx === -1) {
             list.push({
                 userID: uid,
@@ -84,7 +117,7 @@ export function getStoredLeaderboard() {
         return a.attemptCount - b.attemptCount;
     });
 
-    // Compute acceptance rates and ranks
+    // Compute acceptance rates and real ranks
     list = list.map((u, idx) => ({
         ...u,
         rank: idx + 1,
@@ -171,6 +204,18 @@ export function getUserProfile() {
         acceptanceRate: 0,
         rank: list.length + 1
     };
+}
+
+// Remove a single user entry (e.g. duplicate or old test handle)
+export function deleteUserFromLeaderboard(userID) {
+    let data = localStorage.getItem(STORAGE_KEY_LEADERBOARD);
+    if (!data) return getStoredLeaderboard();
+    try {
+        let list = JSON.parse(data);
+        list = list.filter((u) => u.userID !== userID);
+        localStorage.setItem(STORAGE_KEY_LEADERBOARD, JSON.stringify(list));
+    } catch {}
+    return getStoredLeaderboard();
 }
 
 // Reset progress for testing

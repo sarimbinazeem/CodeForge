@@ -70,8 +70,15 @@ class CodeForgeSystem
                 cout << "[Storage] No previous submissions found.\n";
             }
 
-            // Initialize default users on leaderboard
-            seedDefaultUsers();
+            // Load real leaderboard from storage
+            if (storageManager.loadLeaderboard(leaderboardManager))
+            {
+                cout << "[Storage] Leaderboard loaded successfully! (Real Users: " << leaderboardManager.getUserCount() << ")\n";
+            }
+            else
+            {
+                cout << "[Storage] Clean leaderboard initialized.\n";
+            }
 
             cout << "========================== CODEFORGE READY WITH ALL 8 FEATURES =====================\n\n";
         }
@@ -155,11 +162,7 @@ class CodeForgeSystem
 
         void seedDefaultUsers()
         {
-            leaderboardManager.registerUser(101, "alex_code", 450, 4, 5);
-            leaderboardManager.registerUser(102, "sarah_dsa", 720, 7, 8);
-            leaderboardManager.registerUser(103, "kevin_cpp", 300, 3, 6);
-            leaderboardManager.registerUser(104, "elena_algo", 950, 9, 10);
-            leaderboardManager.registerUser(105, "coder_pro", 600, 6, 7);
+            // Empty: Only real users who register or submit solutions will appear on the leaderboard
         }
 
         // Save all application data
@@ -167,8 +170,9 @@ class CodeForgeSystem
         {
             bool problemsSaved = storageManager.saveProblems(problemManager);
             bool submissionsSaved = storageManager.saveSubmission(submissionManager);
+            bool leaderboardSaved = storageManager.saveLeaderboard(leaderboardManager);
 
-            if (problemsSaved && submissionsSaved)
+            if (problemsSaved && submissionsSaved && leaderboardSaved)
             {
                 cout << "[Storage] All data persisted successfully.\n";
                 return true;
@@ -176,6 +180,13 @@ class CodeForgeSystem
 
             cout << "[Storage] Some data could not be saved!\n";
             return false;
+        }
+
+        int registerOrFindUser(const string& username)
+        {
+            int uid = leaderboardManager.registerOrFindUser(username);
+            saveData();
+            return uid;
         }
 
         // Add a problem and save it

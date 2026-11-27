@@ -43,6 +43,20 @@ class LeaderboardManager
             return true;
         }
 
+        int registerOrFindUser(const string& username)
+        {
+            for (int i = 0; i < users.getSize(); i++)
+            {
+                if (users[i].getUsername() == username)
+                {
+                    return users[i].getUserID();
+                }
+            }
+            int newID = 100 + users.getSize() + 1;
+            users.pushBack(User(newID, username, 0, 0, 0));
+            return newID;
+        }
+
         bool recordSubmission(int userID, bool accepted, int pointsReward = 100)
         {
             int idx = findUserIndex(userID);

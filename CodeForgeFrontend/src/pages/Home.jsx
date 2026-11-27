@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getRoadmap, getSkills, completeSkill, getRecommendedProblems } from "../services/api";
+import { getLeaderboard, getRoadmap, getSkills, completeSkill, getRecommendedProblems } from "../services/api";
 import { getStoredLeaderboard, getCurrentUsername } from "../services/leaderboardStorage";
 import "./Home.css";
 
@@ -26,13 +26,18 @@ function Home() {
     async function loadDashboard() {
         try {
             setLoading(true);
-            const [rmData, skData, recData] = await Promise.all([
+            const [lbData, rmData, skData, recData] = await Promise.all([
+                getLeaderboard(5).catch(() => ({ leaderboard: [] })),
                 getRoadmap().catch(() => ({ roadmap: [] })),
                 getSkills().catch(() => ({ skills: [], nextRecommendedTopics: [] })),
                 getRecommendedProblems().catch(() => ({ recommendedProblems: [] }))
             ]);
 
-            setLeaderboard(getStoredLeaderboard());
+            if (lbData?.leaderboard && lbData.leaderboard.length > 0) {
+                setLeaderboard(lbData.leaderboard);
+            } else {
+                setLeaderboard(getStoredLeaderboard());
+            }
             setRoadmap(Array.isArray(rmData?.roadmap) ? rmData.roadmap : []);
             setSkillsData({
                 skills: Array.isArray(skData?.skills) ? skData.skills : [],

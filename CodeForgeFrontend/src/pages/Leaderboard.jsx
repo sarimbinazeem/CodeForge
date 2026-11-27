@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getStoredLeaderboard, getCurrentUsername, getCurrentUserID, resetLeaderboardProgress } from "../services/leaderboardStorage";
+import { getStoredLeaderboard, getCurrentUsername, getCurrentUserID, resetLeaderboardProgress, deleteUserFromLeaderboard } from "../services/leaderboardStorage";
 import { getLeaderboard } from "../services/api";
 import "./Leaderboard.css";
 
@@ -10,28 +10,40 @@ function Leaderboard() {
     const currentUsername = getCurrentUsername();
     const currentUserID = getCurrentUserID();
 
-    function loadData() {
+    async function loadData() {
         setLoading(true);
-        // Load real leaderboard from localStorage
+        try {
+            const serverData = await getLeaderboard(topK);
+            if (serverData?.leaderboard && serverData.leaderboard.length > 0) {
+                setLeaderboard(serverData.leaderboard);
+                setLoading(false);
+                return;
+            }
+        } catch {}
+
         const stored = getStoredLeaderboard();
         setLeaderboard(stored);
         setLoading(false);
-
-        // Also fetch backend to keep in sync
-        getLeaderboard(topK).catch(() => null);
     }
 
     useEffect(() => {
         loadData();
-
         window.addEventListener("codeforge_user_updated", loadData);
         return () => window.removeEventListener("codeforge_user_updated", loadData);
     }, [topK]);
 
     function handleReset() {
-        if (window.confirm("Reset leaderboard progress and reseed initial competitors?")) {
+        if (window.confirm("Clear all recorded scores and restart leaderboard tracking?")) {
             const fresh = resetLeaderboardProgress();
             setLeaderboard(fresh);
+            window.dispatchEvent(new Event("codeforge_user_updated"));
+        }
+    }
+
+    function handleDeleteRow(uid, name) {
+        if (window.confirm(`Remove "${name}" from the leaderboard?`)) {
+            const updated = deleteUserFromLeaderboard(uid);
+            setLeaderboard(updated);
             window.dispatchEvent(new Event("codeforge_user_updated"));
         }
     }
@@ -44,11 +56,11 @@ function Leaderboard() {
                 <div>
                     <div className="title-with-pill">
                         <h1>Live Leaderboard</h1>
-                        <span className="algo-badge heap">Feature 6: MaxHeap Real-Time Ranking</span>
+                        <span className="algo-badge heap">MaxHeap Priority Queue</span>
                     </div>
                     <p>
                         Real-time coder rankings tracking actual problem solutions, points, and acceptance rate.
-                        Scores and rankings are persisted locally and updated immediately when solutions are Accepted.
+                        Scores and rankings update immediately when solutions are Accepted.
                     </p>
                 </div>
 
@@ -75,20 +87,27 @@ function Leaderboard() {
 
             {loading ? (
                 <div className="page-state loading">Loading leaderboard...</div>
+            ) : displayedList.length === 0 ? (
+                <div className="leaderboard-table-card empty-card">
+                    <h3>No coder submissions recorded yet</h3>
+                    <p>Set your username in the navigation bar and solve challenges to earn points and claim the #1 rank!</p>
+                </div>
             ) : (
                 <>
-                    {/* Top 3 Podium Highlights */}
-                    {displayedList.length >= 3 && (
+                    {/* Podium for top real users */}
+                    {displayedList.length >= 1 && (
                         <div className="podium-section">
-                            {/* #2 Silver */}
-                            <div className="podium-card silver">
-                                <div className="medal-badge">🥈 2nd Place</div>
-                                <h3>{displayedList[1]?.username}</h3>
-                                <div className="podium-score">{displayedList[1]?.score || 0} pts</div>
-                                <span className="podium-stats">
-                                    {displayedList[1]?.solvedCount || 0} Solved &bull; {Number(displayedList[1]?.acceptanceRate || 0).toFixed(1)}% Acc
-                                </span>
-                            </div>
+                            {/* #2 Silver (if exists) */}
+                            {displayedList.length >= 2 && (
+                                <div className="podium-card silver">
+                                    <div className="medal-badge">🥈 2nd Place</div>
+                                    <h3>{displayedList[1]?.username}</h3>
+                                    <div className="podium-score">{displayedList[1]?.score || 0} pts</div>
+                                    <span className="podium-stats">
+                                        {displayedList[1]?.solvedCount || 0} Solved &bull; {Number(displayedList[1]?.acceptanceRate || 0).toFixed(1)}% Acc
+                                    </span>
+                                </div>
+                            )}
 
                             {/* #1 Gold */}
                             <div className="podium-card gold">
@@ -101,19 +120,21 @@ function Leaderboard() {
                                 </span>
                             </div>
 
-                            {/* #3 Bronze */}
-                            <div className="podium-card bronze">
-                                <div className="medal-badge">🥉 3rd Place</div>
-                                <h3>{displayedList[2]?.username}</h3>
-                                <div className="podium-score">{displayedList[2]?.score || 0} pts</div>
-                                <span className="podium-stats">
-                                    {displayedList[2]?.solvedCount || 0} Solved &bull; {Number(displayedList[2]?.acceptanceRate || 0).toFixed(1)}% Acc
-                                </span>
-                            </div>
+                            {/* #3 Bronze (if exists) */}
+                            {displayedList.length >= 3 && (
+                                <div className="podium-card bronze">
+                                    <div className="medal-badge">🥉 3rd Place</div>
+                                    <h3>{displayedList[2]?.username}</h3>
+                                    <div className="podium-score">{displayedList[2]?.score || 0} pts</div>
+                                    <span className="podium-stats">
+                                        {displayedList[2]?.solvedCount || 0} Solved &bull; {Number(displayedList[2]?.acceptanceRate || 0).toFixed(1)}% Acc
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     )}
 
-                    {/* Complete Rankings Table */}
+                    {/* Rankings Table */}
                     <div className="leaderboard-table-card">
                         <table className="leaderboard-table">
                             <thead>
@@ -124,6 +145,7 @@ function Leaderboard() {
                                     <th>Problems Solved</th>
                                     <th>Submissions</th>
                                     <th>Accuracy</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -172,6 +194,15 @@ function Leaderboard() {
                                                         ></div>
                                                     </div>
                                                 </div>
+                                            </td>
+                                            <td className="action-cell">
+                                                <button
+                                                    className="delete-user-row-btn"
+                                                    onClick={() => handleDeleteRow(user?.userID, user?.username)}
+                                                    title={`Remove "${user?.username}" from leaderboard`}
+                                                >
+                                                    ✕
+                                                </button>
                                             </td>
                                         </tr>
                                     );

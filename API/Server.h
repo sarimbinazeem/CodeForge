@@ -63,6 +63,22 @@ class APIServer
                 res.set_content(R"({"status":"healthy","service":"CodeForge Backend"})", "application/json");
             });
 
+            // Global User Registration endpoint
+            svr.Post("/api/users/register", [this](const httplib::Request& req, httplib::Response& res) {
+                try
+                {
+                    json body = json::parse(req.body);
+                    string username = body.value("username", "Guest");
+                    int uid = codeForge.registerOrFindUser(username);
+                    res.set_content(json({{"status", "success"}, {"userID", uid}, {"username", username}}).dump(), "application/json");
+                }
+                catch (const exception& e)
+                {
+                    res.status = 400;
+                    res.set_content(json({{"error", e.what()}}).dump(), "application/json");
+                }
+            });
+
             // Unique topics list endpoint
             svr.Get("/api/topics", [this](const httplib::Request&, httplib::Response& res) {
                 DynamicArray<string> topicList;

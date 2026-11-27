@@ -24,6 +24,21 @@ export async function getTopics() {
     }
 }
 
+// Register real user handle on the central C++ server for public multiplayer leaderboard
+export async function registerUserOnServer(username) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username })
+        });
+        if (!response.ok) return null;
+        return await response.json();
+    } catch {
+        return null;
+    }
+}
+
 // Feature 1: Dynamic Array — Problem Explorer
 export async function exploreProblems({ difficulty = "", topic = "", sortBy = "id", asc = true, page = 1, pageSize = 6 } = {}) {
     const params = new URLSearchParams({ difficulty, topic, sortBy, asc: String(asc), page: String(page), pageSize: String(pageSize) });
