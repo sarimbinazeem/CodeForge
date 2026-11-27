@@ -1,5 +1,5 @@
-
 #pragma once
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -12,7 +12,9 @@
 using namespace std;
 
 /*
-Storage in database so that the program contains memory
+StorageManager:
+Handles binary file persistence for problems and submissions
+Ensures 100% backward compatibility with saved data formats
 */
 
 class StorageManager
@@ -28,63 +30,54 @@ class StorageManager
             submissionFile = "Storage/submissions.dat";
             filesystem::create_directories("Storage");
         }
-        
-        // Write a string to a binary file.
-        void writeString(ofstream& file, string value)
+
+        // Write a string to a binary file
+        void writeString(ofstream& file, const string& value)
         {
             int length = (int)value.length();
-
-            //create buffer in file to write 
             file.write((char*)&length, sizeof(length));
-        
             if (length > 0)
             {
                 file.write(value.c_str(), length);
             }
         }
-        
-        // Read a string from a binary file. and store intot a value string
+
+        // Read a string from a binary file
         bool readString(ifstream& file, string& value)
         {
             int length;
-        
             if (!file.read((char*)&length, sizeof(length)))
                 return false;
-        
-            // Prevent invalid or excessively large allocations.
+
             if (length < 0 || length > 10000000)
                 return false;
-        
+
             value = "";
-        
             if (length > 0)
             {
                 value.resize(length);
-        
                 if (!file.read(&value[0], length))
                     return false;
             }
 
             return true;
         }
-        
-        // Save all problems.
+
+        // Save all problems
         bool saveProblems(const ProblemManager& manager)
         {
             ofstream file(problemFile, ios::binary);
-            
             if (!file.is_open())
                 return false;
-            
+
             int count = manager.getProblemCount();
             file.write((char*)&count, sizeof(count));
-            
+
             for (int i = 0; i < count; i++)
             {
                 Problem problem = manager.getProblemAt(i);
 
                 int id = problem.getProblemID();
-
                 file.write((char*)&id, sizeof(id));
                 writeString(file, problem.getTitle());
                 writeString(file, problem.getDescription());
@@ -96,55 +89,52 @@ class StorageManager
                 for (int j = 0; j < testCount; j++)
                 {
                     TestCase test = problem.getTestCase(j);
-
                     writeString(file, test.getInput());
                     writeString(file, test.getExpectedOutput());
                 }
             }
 
             file.close();
-
             return !file.fail();
         }
 
-        bool saveSubmission(const SubmissionManager& manager){
+        // Save all submissions
+        bool saveSubmission(const SubmissionManager& manager)
+        {
             ofstream file(submissionFile, ios::binary);
-
-            if(!file.is_open()){
+            if (!file.is_open())
+            {
                 return false;
             }
 
             int count = manager.getSubmissionCount();
-            //create buffer
             file.write((char*)&count, sizeof(count));
-            for(int i = 0 ; i<count ; i++)
+            for (int i = 0; i < count; i++)
             {
                 Submission sub = manager.getSubmissionAt(i);
                 int subID = sub.getSubmissionID();
                 int probID = sub.getProblemID();
-                //we can write the ID directly
+
                 file.write((char*)&subID, sizeof(subID));
                 file.write((char*)&probID, sizeof(probID));
 
-                writeString(file,sub.getSourceCode());
-                writeString(file,sub.getLanguage());
-                writeString(file,sub.getStatus());
+                writeString(file, sub.getSourceCode());
+                writeString(file, sub.getLanguage());
+                writeString(file, sub.getStatus());
             }
 
             file.close();
             return !file.fail();
         }
 
-        // Load problems from storage.
+        // Load problems from storage
         bool loadProblems(ProblemManager& manager)
         {
             ifstream file(problemFile, ios::binary);
-
             if (!file.is_open())
                 return false;
 
             int count;
-
             if (!file.read((char*)&count, sizeof(count)))
                 return false;
 
@@ -154,15 +144,10 @@ class StorageManager
             for (int i = 0; i < count; i++)
             {
                 int id;
-
                 if (!file.read((char*)&id, sizeof(id)))
                     return false;
 
-                string title;
-                string description;
-                string difficulty;
-                string topic;
-
+                string title, description, difficulty, topic;
                 if (!readString(file, title) || !readString(file, description) ||
                     !readString(file, difficulty) || !readString(file, topic))
                 {
@@ -170,92 +155,79 @@ class StorageManager
                 }
 
                 int testCount;
-
                 if (!file.read((char*)&testCount, sizeof(testCount)))
                     return false;
 
                 if (testCount < 0 || testCount > 100000)
                     return false;
 
-                //read from the file and make a problem object
-                Problem problem(id,title,description,difficulty,topic);
+                Problem problem(id, title, description, difficulty, topic);
 
                 for (int j = 0; j < testCount; j++)
                 {
-                    //go through all the test cases and store each test cases into the problem
-                    string input;
-                    string expectedOutput;
-
+                    string input, expectedOutput;
                     if (!readString(file, input) || !readString(file, expectedOutput))
                     {
                         return false;
                     }
-
-                    problem.addTestCase( TestCase(input, expectedOutput));
+                    problem.addTestCase(TestCase(input, expectedOutput));
                 }
 
                 if (!manager.addProblem(problem))
                 {
-                    cout << "Problem ID " << id  << " already exists. Skipping.\n";
+                    cout << "Problem ID " << id << " already exists. Skipping.\n";
                 }
             }
 
             file.close();
-
             return true;
         }
 
-        bool loadSubmission(SubmissionManager &manager){
-            ifstream file(submissionFile,ios::binary);
-
-            if(!file.is_open()){
+        // Load submissions from storage
+        bool loadSubmission(SubmissionManager& manager)
+        {
+            ifstream file(submissionFile, ios::binary);
+            if (!file.is_open())
+            {
                 return false;
             }
 
             int count;
-            //get the number of count
-            if(!file.read((char*)&count,sizeof(count))){
-                return false; //empty file
+            if (!file.read((char*)&count, sizeof(count)))
+            {
+                return false;
             }
-             if (count < 0 || count > 100000)
-             {
-                //boundary check
-                 return false;          
-             }
 
-             for(int i =0 ; i<count; i++)
-             {
-                int submissionID;
-                int problemID;
+            if (count < 0 || count > 100000)
+            {
+                return false;
+            }
 
-                if (!file.read((char*)&submissionID, sizeof(submissionID)) ||!file.read((char*)&problemID, sizeof(problemID)))
+            for (int i = 0; i < count; i++)
+            {
+                int submissionID, problemID;
+                if (!file.read((char*)&submissionID, sizeof(submissionID)) ||
+                    !file.read((char*)&problemID, sizeof(problemID)))
                 {
                     return false;
                 }
 
-                string sourceCode;
-                string language;
-                string status;
-
+                string sourceCode, language, status;
                 if (!readString(file, sourceCode) || !readString(file, language) || !readString(file, status))
                 {
                     return false;
                 }
 
-                Submission submission(submissionID,problemID,sourceCode,language);
-
+                Submission submission(submissionID, problemID, sourceCode, language);
                 submission.setStatus(status);
-                //add submission only if it doesnt exist
+
                 if (!manager.addSubmission(submission))
                 {
-                    cout << "Submission ID " << submissionID<< " already exists. Skipping.\n";
+                    cout << "Submission ID " << submissionID << " already exists. Skipping.\n";
                 }
             }
 
             file.close();
-
             return true;
-        }                
-    
-        
+        }
 };
