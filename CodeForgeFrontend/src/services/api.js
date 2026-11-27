@@ -60,11 +60,11 @@ export async function getProblemProgression(problemID) {
 }
 
 // Submit Solution (Synchronous Evaluation)
-export async function submitSolution(submissionID, problemID, sourceCode, language = "C++") {
+export async function submitSolution(submissionID, problemID, sourceCode, language = "C++", userID = 1, username = "Guest") {
     const response = await fetch(`${API_BASE_URL}/submissions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ submissionID, problemID, sourceCode, language })
+        body: JSON.stringify({ submissionID, problemID, sourceCode, language, userID, username })
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Submission failed");
@@ -72,11 +72,11 @@ export async function submitSolution(submissionID, problemID, sourceCode, langua
 }
 
 // Feature 4: Queue — Submission Processing
-export async function enqueueSolution(submissionID, problemID, sourceCode, language = "C++") {
+export async function enqueueSolution(submissionID, problemID, sourceCode, language = "C++", userID = 1, username = "Guest") {
     const response = await fetch(`${API_BASE_URL}/queue/enqueue`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ submissionID, problemID, sourceCode, language })
+        body: JSON.stringify({ submissionID, problemID, sourceCode, language, userID, username })
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Failed to enqueue submission");

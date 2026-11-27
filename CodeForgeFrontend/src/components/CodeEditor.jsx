@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { submitSolution, enqueueSolution } from "../services/api";
+import { getCurrentUsername, getCurrentUserID, recordActualSubmission } from "../services/leaderboardStorage";
 import "./CodeEditor.css";
 
 const STARTER_CODE = `#include <iostream>
@@ -240,14 +241,28 @@ function CodeEditor({ problemID }) {
             setQueueMessage("");
 
             const submissionID = Math.floor(Date.now() % 2000000000);
+            const uname = getCurrentUsername() || "Coder";
+            const uid = getCurrentUserID();
+
             const response = await submitSolution(
                 submissionID,
                 Number(problemID),
                 sourceCode,
-                "C++"
+                "C++",
+                uid,
+                uname
             );
 
             setResult(response);
+
+            // Record actual submission in localStorage live leaderboard
+            const isAccepted = response?.result?.verdict === "Accepted";
+            const update = recordActualSubmission(isAccepted);
+            window.dispatchEvent(new Event("codeforge_user_updated"));
+
+            if (isAccepted) {
+                setQueueMessage(`🎉 Accepted! +${update.pointsAwarded} Points! You are now ranked #${update.newRank} on the Live Leaderboard!`);
+            }
         } catch (err) {
             setError(err.message);
         } finally {
@@ -267,11 +282,16 @@ function CodeEditor({ problemID }) {
             setResult(null);
 
             const submissionID = Math.floor(Date.now() % 2000000000);
+            const uname = getCurrentUsername() || "Coder";
+            const uid = getCurrentUserID();
+
             const response = await enqueueSolution(
                 submissionID,
                 Number(problemID),
                 sourceCode,
-                "C++"
+                "C++",
+                uid,
+                uname
             );
 
             setQueueMessage(`Submission #${response.submissionID} placed into FIFO Judge Queue! [Queue Size: ${response.queueSize}]`);
