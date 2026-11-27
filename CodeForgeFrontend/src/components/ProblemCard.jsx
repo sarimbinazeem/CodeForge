@@ -1,52 +1,54 @@
-
 import { Link } from "react-router-dom";
 import "./ProblemCard.css";
 
 function ProblemCard({ problem }) {
+    const diffClass = (problem.difficulty || "easy").toLowerCase();
+
     return (
         <div className="problem-card">
-
             <div className="problem-card-main">
-
-                <div className="problem-title">
-                    <span className="problem-id">
-                        #{problem.problemID}
-                    </span>
-
-                    <h3>{problem.title}</h3>
+                <div className="problem-title-bar">
+                    <span className="problem-id">#{problem.problemID}</span>
+                    <Link to={`/problems/${problem.problemID}`} className="problem-title-link">
+                        {problem.title}
+                    </Link>
                 </div>
 
-                <p className="problem-description">
-                    {problem.description}
+                <p className="problem-description-excerpt">
+                    {problem.description && problem.description.length > 140
+                        ? problem.description.substring(0, 140) + "..."
+                        : problem.description}
                 </p>
 
-                <div className="problem-tags">
-                    <span className={`difficulty ${problem.difficulty.toLowerCase()}`}>
+                <div className="problem-tags-row">
+                    <span className={`diff-pill ${diffClass}`}>
                         {problem.difficulty}
                     </span>
 
-                    <span className="topic-tag">
+                    <span className="topic-pill">
                         {problem.topic}
                     </span>
-                </div>
 
+                    {problem.rating && (
+                        <span className="rating-pill">
+                            ★ {problem.rating}
+                        </span>
+                    )}
+
+                    <span className="test-count-pill">
+                        {problem.testCaseCount || 0} Test Cases
+                    </span>
+                </div>
             </div>
 
-            <div className="problem-card-side">
-
-                <span className="test-count">
-                    {problem.testCaseCount} Test Cases
-                </span>
-
+            <div className="problem-card-actions">
                 <Link
                     to={`/problems/${problem.problemID}`}
-                    className="solve-button"
+                    className="solve-btn"
                 >
-                    Solve Problem
+                    Solve Challenge &rarr;
                 </Link>
-
             </div>
-
         </div>
     );
 }

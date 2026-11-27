@@ -1,11 +1,9 @@
-
 import { Link, NavLink } from "react-router-dom";
 import "./Navbar.css";
 
 function Navbar() {
     return (
         <nav className="navbar">
-
             <Link to="/" className="navbar-logo">
                 <span className="logo-bracket">{"<"}</span>
                 CodeForge
@@ -13,7 +11,6 @@ function Navbar() {
             </Link>
 
             <div className="navbar-links">
-
                 <NavLink
                     to="/"
                     className={({ isActive }) =>
@@ -21,7 +18,7 @@ function Navbar() {
                     }
                     end
                 >
-                    Home
+                    Dashboard
                 </NavLink>
 
                 <NavLink
@@ -30,7 +27,7 @@ function Navbar() {
                         isActive ? "nav-link active" : "nav-link"
                     }
                 >
-                    Problems
+                    Problems Explorer
                 </NavLink>
 
                 <NavLink
@@ -39,18 +36,16 @@ function Navbar() {
                         isActive ? "nav-link active" : "nav-link"
                     }
                 >
-                    Submissions
+                    Submissions & Queue
                 </NavLink>
-
             </div>
 
             <div className="navbar-right">
                 <span className="navbar-status">
                     <span className="status-dot"></span>
-                    Backend
+                    API Active (Port 8080)
                 </span>
             </div>
-
         </nav>
     );
 }
