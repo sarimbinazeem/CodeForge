@@ -62,7 +62,7 @@ class ProgramRunner
             string cleanErr = runtimeErrorFile;
             for (char& c : cleanErr) if (c == '/') c = '\\';
 
-            string command = "\"" + cleanExec + "\" < \"" + cleanIn + "\" > \"" + cleanOut + "\" 2> \"" + cleanErr + "\"";
+            string command = cleanExec + " < " + cleanIn + " > " + cleanOut + " 2> " + cleanErr;
             int status = system(command.c_str());
             int exitCode = status;
 #else
@@ -76,8 +76,12 @@ class ProgramRunner
             int status = system(command.c_str());
             int exitCode = WEXITSTATUS(status);
 #endif
-
-            if (exitCode != 0)
+            if (exitCode == 124)
+            {
+                errorMessage = "Time Limit Exceeded (Limit: 2.0s)";
+                return false;
+            }
+            else if (exitCode != 0)
             {
                 ifstream errFile(runtimeErrorFile);
                 string errLine;

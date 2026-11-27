@@ -97,10 +97,11 @@ class Compiler
                 }
                 return false;
             }
-            #ifndef _WIN32
-                // Ensure executable permission on Unix systems
-                system(("chmod +x \"" + executableFile + "\" 2>/dev/null").c_str());
-            #endif
+
+#ifndef _WIN32
+            // Ensure executable permission on Unix systems
+            system(("chmod +x \"" + executableFile + "\" 2>/dev/null").c_str());
+#endif
 
             return true;
         }
