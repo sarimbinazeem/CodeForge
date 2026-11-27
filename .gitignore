@@ -1,0 +1,19 @@
+# Compiled binaries and executables
+*.exe
+*.o
+*.obj
+*.out
+
+# Judge sandbox runtime artifacts
+Judge/Workspace/*
+!Judge/Workspace/.gitkeep
+
+# Frontend dependencies and builds
+frontend/node_modules/
+frontend/dist/
+
+# OS and IDE temporary files
+.vscode/
+.DS_Store
+Thumbs.db
+server.log
