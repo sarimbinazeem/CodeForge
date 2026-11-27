@@ -1,11 +1,10 @@
-#pragma once  // to prevent redefinition problem
+#pragma once
 
 #include <string>
 using namespace std;
 
 /*
 Every test case has an input and an expected output
-
 */
 
 class TestCase
@@ -14,7 +13,7 @@ class TestCase
         string input;
         string expectedOutput;
 
-    public:       
+    public:
         TestCase()
         {
             input = "";
@@ -32,7 +31,6 @@ class TestCase
             return input;
         }
 
-        
         string getExpectedOutput() const
         {
             return expectedOutput;
