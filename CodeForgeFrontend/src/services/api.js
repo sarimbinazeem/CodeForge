@@ -13,6 +13,17 @@ export async function getProblem(problemID) {
     return await response.json();
 }
 
+// Retrieve unique topics from database
+export async function getTopics() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/topics`);
+        if (!response.ok) return [];
+        return await response.json();
+    } catch {
+        return [];
+    }
+}
+
 // Feature 1: Dynamic Array — Problem Explorer
 export async function exploreProblems({ difficulty = "", topic = "", sortBy = "id", asc = true, page = 1, pageSize = 6 } = {}) {
     const params = new URLSearchParams({ difficulty, topic, sortBy, asc: String(asc), page: String(page), pageSize: String(pageSize) });

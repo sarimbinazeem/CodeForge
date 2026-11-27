@@ -1,12 +1,27 @@
 import { useEffect, useState } from "react";
-import { exploreProblems, lookupProblemByID } from "../services/api";
+import { exploreProblems, lookupProblemByID, getTopics } from "../services/api";
 import ProblemCard from "../components/ProblemCard";
 import "./Problems.css";
+
+const DEFAULT_TOPICS = [
+    "Arrays & Hashing",
+    "Backtracking",
+    "Basic Programming",
+    "Binary Search",
+    "Binary Search Tree",
+    "Dynamic Programming",
+    "Graphs",
+    "Heap & Priority Queue",
+    "Linked List",
+    "Sorting",
+    "Stack & Queue"
+];
 
 function Problems() {
     const [problems, setProblems] = useState([]);
     const [totalProblems, setTotalProblems] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
+    const [availableTopics, setAvailableTopics] = useState(DEFAULT_TOPICS);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -16,10 +31,26 @@ function Problems() {
     const [sortBy, setSortBy] = useState("id");
     const [asc, setAsc] = useState(true);
     const [page, setPage] = useState(1);
-    const pageSize = 5;
+    const pageSize = 8;
 
     // Feature 5: Hash Table Instant Lookup input
     const [searchID, setSearchID] = useState("");
+
+    // Fetch dynamic topics from backend
+    useEffect(() => {
+        async function loadTopics() {
+            try {
+                const fetched = await getTopics();
+                if (fetched && fetched.length > 0) {
+                    const merged = Array.from(new Set([...fetched, ...DEFAULT_TOPICS])).sort();
+                    setAvailableTopics(merged);
+                }
+            } catch {
+                setAvailableTopics(DEFAULT_TOPICS);
+            }
+        }
+        loadTopics();
+    }, []);
 
     async function fetchProblems() {
         try {
@@ -86,12 +117,31 @@ function Problems() {
                 <div>
                     <h1>Problem Explorer</h1>
                     <p>
-                        Explore DSA challenges with dynamic filtering, sorting, pagination, and instant hash lookup.
+                        Browse all {totalProblems} DSA challenges categorized by topic, difficulty, and algorithmic paradigm.
                     </p>
                 </div>
                 <span className="problem-total">
                     {totalProblems} Problems Found
                 </span>
+            </div>
+
+            {/* Quick Topic Chips Ribbon */}
+            <div className="topic-chips-ribbon">
+                <button
+                    className={`topic-chip ${topic === "" ? "active" : ""}`}
+                    onClick={() => { setTopic(""); setPage(1); }}
+                >
+                    All Topics
+                </button>
+                {availableTopics.map((t) => (
+                    <button
+                        key={t}
+                        className={`topic-chip ${topic === t ? "active" : ""}`}
+                        onClick={() => { setTopic(t); setPage(1); }}
+                    >
+                        {t}
+                    </button>
+                ))}
             </div>
 
             {/* Feature 1 & 5: Explorer Controls Toolbar */}
@@ -121,6 +171,7 @@ function Problems() {
                         value={difficulty}
                         onChange={(e) => { setDifficulty(e.target.value); setPage(1); }}
                         className="filter-select"
+                        title="Filter by Difficulty"
                     >
                         <option value="">All Difficulties</option>
                         <option value="Easy">Easy</option>
@@ -132,20 +183,21 @@ function Problems() {
                         value={topic}
                         onChange={(e) => { setTopic(e.target.value); setPage(1); }}
                         className="filter-select"
+                        title="Filter by Topic"
                     >
-                        <option value="">All Topics</option>
-                        <option value="Arrays & Hashing">Arrays & Hashing</option>
-                        <option value="Linked List">Linked List</option>
-                        <option value="Stack & Queue">Stack & Queue</option>
-                        <option value="Binary Search">Binary Search</option>
-                        <option value="Dynamic Programming">Dynamic Programming</option>
-                        <option value="Graphs">Graphs</option>
+                        <option value="">All Topics ({availableTopics.length})</option>
+                        {availableTopics.map((t) => (
+                            <option key={t} value={t}>
+                                {t}
+                            </option>
+                        ))}
                     </select>
 
                     <select
                         value={sortBy}
                         onChange={(e) => { setSortBy(e.target.value); setPage(1); }}
                         className="filter-select"
+                        title="Sort Column"
                     >
                         <option value="id">Sort by ID</option>
                         <option value="title">Sort by Title</option>
@@ -167,7 +219,7 @@ function Problems() {
             {error && <div className="error-message">{error}</div>}
 
             {!loading && !error && problems.length === 0 && (
-                <p className="empty-message">No problems found matching your criteria.</p>
+                <p className="empty-message">No problems found matching topic "{topic || "All"}".</p>
             )}
 
             {!loading && !error && problems.length > 0 && (

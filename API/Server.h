@@ -63,6 +63,31 @@ class APIServer
                 res.set_content(R"({"status":"healthy","service":"CodeForge Backend"})", "application/json");
             });
 
+            // Unique topics list endpoint
+            svr.Get("/api/topics", [this](const httplib::Request&, httplib::Response& res) {
+                DynamicArray<string> topicList;
+                int count = codeForge.getProblemManager().getProblemCount();
+                for (int i = 0; i < count; i++)
+                {
+                    string t = codeForge.getProblemManager().getProblemAt(i).getTopic();
+                    bool found = false;
+                    for (int j = 0; j < topicList.getSize(); j++)
+                    {
+                        if (topicList[j] == t) { found = true; break; }
+                    }
+                    if (!found && !t.empty())
+                    {
+                        topicList.pushBack(t);
+                    }
+                }
+                json resp = json::array();
+                for (int i = 0; i < topicList.getSize(); i++)
+                {
+                    resp.push_back(topicList[i]);
+                }
+                res.set_content(resp.dump(), "application/json");
+            });
+
             // 1. Core Problems List
             svr.Get("/api/problems", [this](const httplib::Request&, httplib::Response& res) {
                 json response = json::array();
@@ -646,9 +671,10 @@ class APIServer
             cout << " Local API URL:  http://localhost:" << port << "/api\n";
             cout << " Network URL:    http://0.0.0.0:" << port << "/api\n";
             cout << " CORS:           Enabled (React frontend can connect seamlessly)\n";
-            cout << " Features:       8 Custom Data Structures Active & Hooked to API\n";
+            cout << " Loaded Problems: " << codeForge.getProblemManager().getProblemCount() << "\n";
+            cout << " Loaded Submissions: " << codeForge.getSubmissionManager().getSubmissionCount() << "\n";
             cout << " Status:         Listening for frontend requests... (Ctrl+C to stop)\n";
-            cout << "===================================================================\n\n";
+            cout << "===================================================================\n\n" << flush;
 
             // Start blocking HTTP listener so backend stays running and logs all frontend calls
             svr.listen("0.0.0.0", port);

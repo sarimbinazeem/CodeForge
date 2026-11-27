@@ -1,318 +1,230 @@
 #pragma once
 
 #include <iostream>
+#include <string>
+#include "LinkedList.h"
+#include "DynamicArray.h"
 using namespace std;
 
-template <typename T>
-class LinkedList
+// Hash helper functions for int and string keys
+template <typename Key>
+struct HashHelper
+{
+    static int hash(const Key& key, int cap)
+    {
+        long long k = (long long)key;
+        int idx = (int)(k % cap);
+        if (idx < 0) idx += cap;
+        return idx;
+    }
+};
+
+template <>
+struct HashHelper<string>
+{
+    static int hash(const string& key, int cap)
+    {
+        unsigned long long h = 5381;
+        for (char c : key)
+        {
+            h = ((h << 5) + h) + (unsigned char)c; // djb2 hash
+        }
+        int idx = (int)(h % (unsigned long long)cap);
+        if (idx < 0) idx += cap;
+        return idx;
+    }
+};
+
+/*
+Feature 5: Hash Table — Instant Problem Lookup
+Supports O(1) average lookup by ID, title, and tags
+*/
+
+template <typename K, typename V>
+class HashTable
 {
     private:
-        struct Node
+        struct Entry
         {
-            T data;
-            Node* next;
-            Node* prev;
+            K key;
+            V value;
 
-            Node(T value)
+            Entry() : key(K()), value(V()) {}
+            Entry(K k, V v) : key(k), value(v) {}
+
+            bool operator==(const Entry& other) const
             {
-                data = value;
-                next = nullptr;
-                prev = nullptr;
+                return key == other.key;
             }
         };
 
-        Node* head;
-        Node* tail;
+        LinkedList<Entry>* table;
+        int capacity;
         int size;
 
-        // Navigation cursor for history browsing
-        Node* cursor;
-
-    public:
-        // Constructor
-        LinkedList()
+        int hashFunction(const K& key) const
         {
-            head = nullptr;
-            tail = nullptr;
-            size = 0;
-            cursor = nullptr;
+            return HashHelper<K>::hash(key, capacity);
         }
 
-        // Deep copy constructor
-        LinkedList(const LinkedList& other)
+        void resize()
         {
-            head = nullptr;
-            tail = nullptr;
-            size = 0;
-            cursor = nullptr;
+            int newCap = capacity * 2;
+            LinkedList<Entry>* newTable = new LinkedList<Entry>[newCap];
 
-            Node* current = other.head;
-            while (current != nullptr)
+            for (int i = 0; i < capacity; i++)
             {
-                insertAtEnd(current->data);
-                current = current->next;
+                for (int j = 0; j < table[i].getSize(); j++)
+                {
+                    Entry entry = table[i].getAt(j);
+                    int newIdx = HashHelper<K>::hash(entry.key, newCap);
+                    newTable[newIdx].insertAtEnd(entry);
+                }
+            }
+
+            delete[] table;
+            table = newTable;
+            capacity = newCap;
+        }
+
+    public:
+        HashTable(int initialCapacity = 16)
+        {
+            capacity = initialCapacity > 0 ? initialCapacity : 16;
+            size = 0;
+            table = new LinkedList<Entry>[capacity];
+        }
+
+        HashTable(const HashTable& other)
+        {
+            capacity = other.capacity;
+            size = other.size;
+            table = new LinkedList<Entry>[capacity];
+
+            for (int i = 0; i < capacity; i++)
+            {
+                table[i] = other.table[i];
             }
         }
 
-        // Deep copy assignment operator
-        LinkedList& operator=(const LinkedList& other)
+        HashTable& operator=(const HashTable& other)
         {
             if (this != &other)
             {
-                clear();
-                Node* current = other.head;
-                while (current != nullptr)
+                delete[] table;
+                capacity = other.capacity;
+                size = other.size;
+                table = new LinkedList<Entry>[capacity];
+
+                for (int i = 0; i < capacity; i++)
                 {
-                    insertAtEnd(current->data);
-                    current = current->next;
+                    table[i] = other.table[i];
                 }
             }
             return *this;
         }
 
-        // Destructor
-        ~LinkedList()
+        ~HashTable()
         {
-            clear();
+            delete[] table;
         }
 
-        void insertAtBeginning(T value)
+        void insert(const K& key, const V& value)
         {
-            Node* newNode = new Node(value);
+            int index = hashFunction(key);
 
-            if (head == nullptr)
+            // Update if key already exists
+            for (int i = 0; i < table[index].getSize(); i++)
             {
-                head = newNode;
-                tail = newNode;
-            }
-            else
-            {
-                newNode->next = head;
-                head->prev = newNode;
-                head = newNode;
-            }
-
-            size++;
-            if (cursor == nullptr)
-            {
-                cursor = head;
-            }
-        }
-
-        void insertAtEnd(T value)
-        {
-            Node* newNode = new Node(value);
-
-            if (head == nullptr)
-            {
-                head = newNode;
-                tail = newNode;
-            }
-            else
-            {
-                tail->next = newNode;
-                newNode->prev = tail;
-                tail = newNode;
-            }
-
-            size++;
-            if (cursor == nullptr)
-            {
-                cursor = tail;
-            }
-        }
-
-        // Insert at a specific index
-        bool insertAt(int index, T value)
-        {
-            if (index < 0 || index > size)
-                return false;
-
-            if (index == 0)
-            {
-                insertAtBeginning(value);
-                return true;
-            }
-
-            if (index == size)
-            {
-                insertAtEnd(value);
-                return true;
-            }
-
-            Node* current = head;
-            for (int i = 0; i < index - 1; i++)
-            {
-                current = current->next;
-            }
-
-            Node* newNode = new Node(value);
-            newNode->next = current->next;
-            newNode->prev = current;
-            if (current->next != nullptr)
-            {
-                current->next->prev = newNode;
-            }
-            current->next = newNode;
-
-            size++;
-            return true;
-        }
-
-        // Delete first node
-        bool deleteFromBeginning()
-        {
-            if (head == nullptr)
-                return false;
-
-            Node* temp = head;
-            head = head->next;
-
-            if (head != nullptr)
-            {
-                head->prev = nullptr;
-            }
-            else
-            {
-                tail = nullptr;
-            }
-
-            if (cursor == temp)
-            {
-                cursor = head;
-            }
-
-            delete temp;
-            size--;
-            return true;
-        }
-
-        bool deleteFromEnd()
-        {
-            if (head == nullptr)
-                return false;
-
-            if (head == tail)
-            {
-                if (cursor == head)
+                Entry entry = table[index].getAt(i);
+                if (entry.key == key)
                 {
-                    cursor = nullptr;
+                    table[index].deleteAt(i);
+                    table[index].insertAt(i, Entry(key, value));
+                    return;
                 }
-                delete head;
-                head = nullptr;
-                tail = nullptr;
             }
-            else
-            {
-                Node* temp = tail;
-                tail = tail->prev;
-                tail->next = nullptr;
 
-                if (cursor == temp)
+            // Insert new entry
+            table[index].insertAtEnd(Entry(key, value));
+            size++;
+
+            if ((double)size / capacity > 0.75)
+            {
+                resize();
+            }
+        }
+
+        bool search(const K& key, V& result) const
+        {
+            int index = hashFunction(key);
+
+            for (int i = 0; i < table[index].getSize(); i++)
+            {
+                Entry entry = table[index].getAt(i);
+                if (entry.key == key)
                 {
-                    cursor = tail;
-                }
-
-                delete temp;
-            }
-
-            size--;
-            return true;
-        }
-
-        bool deleteAt(int index)
-        {
-            if (index < 0 || index >= size)
-                return false;
-
-            if (index == 0)
-            {
-                return deleteFromBeginning();
-            }
-
-            if (index == size - 1)
-            {
-                return deleteFromEnd();
-            }
-
-            Node* current = head;
-            for (int i = 0; i < index; i++)
-            {
-                current = current->next;
-            }
-
-            if (cursor == current)
-            {
-                cursor = current->next != nullptr ? current->next : current->prev;
-            }
-
-            current->prev->next = current->next;
-            current->next->prev = current->prev;
-
-            delete current;
-            size--;
-            return true;
-        }
-
-        bool search(T value) const
-        {
-            Node* current = head;
-            while (current != nullptr)
-            {
-                if (current->data == value)
+                    result = entry.value;
                     return true;
-
-                current = current->next;
+                }
             }
 
             return false;
         }
 
-        void display() const
+        bool contains(const K& key) const
         {
-            Node* current = head;
-            while (current != nullptr)
-            {
-                cout << current->data << " -> ";
-                current = current->next;
-            }
-
-            cout << "NULL" << endl;
+            V dummy;
+            return search(key, dummy);
         }
 
-        // Reverse the linked list
-        void reverse()
+        bool remove(const K& key)
         {
-            Node* current = head;
-            Node* temp = nullptr;
+            int index = hashFunction(key);
 
-            while (current != nullptr)
+            for (int i = 0; i < table[index].getSize(); i++)
             {
-                temp = current->prev;
-                current->prev = current->next;
-                current->next = temp;
-                current = current->prev;
+                Entry entry = table[index].getAt(i);
+                if (entry.key == key)
+                {
+                    table[index].deleteAt(i);
+                    size--;
+                    return true;
+                }
             }
 
-            if (temp != nullptr)
-            {
-                tail = head;
-                head = temp->prev;
-            }
+            return false;
         }
 
-        T getAt(int index) const
+        DynamicArray<K> getAllKeys() const
         {
-            if (index < 0 || index >= size)
-                return T();
-
-            Node* current = head;
-            for (int i = 0; i < index; i++)
+            DynamicArray<K> keys;
+            for (int i = 0; i < capacity; i++)
             {
-                current = current->next;
+                for (int j = 0; j < table[i].getSize(); j++)
+                {
+                    keys.pushBack(table[i].getAt(j).key);
+                }
             }
+            return keys;
+        }
 
-            return current->data;
+        DynamicArray<V> getAllValues() const
+        {
+            DynamicArray<V> values;
+            for (int i = 0; i < capacity; i++)
+            {
+                for (int j = 0; j < table[i].getSize(); j++)
+                {
+                    values.pushBack(table[i].getAt(j).value);
+                }
+            }
+            return values;
+        }
+
+        bool isEmpty() const
+        {
+            return size == 0;
         }
 
         int getSize() const
@@ -320,79 +232,21 @@ class LinkedList
             return size;
         }
 
-        bool isEmpty() const
+        int getCapacity() const
         {
-            return head == nullptr;
+            return capacity;
+        }
+
+        double getLoadFactor() const
+        {
+            return (double)size / capacity;
         }
 
         void clear()
         {
-            Node* current = head;
-            while (current != nullptr)
-            {
-                Node* temp = current;
-                current = current->next;
-                delete temp;
-            }
-
-            head = nullptr;
-            tail = nullptr;
-            cursor = nullptr;
+            delete[] table;
+            capacity = 16;
             size = 0;
-        }
-
-        // ===== NAVIGATION CURSOR API (Submission History) =====
-        void resetCursorToBeginning()
-        {
-            cursor = head;
-        }
-
-        void resetCursorToEnd()
-        {
-            cursor = tail;
-        }
-
-        bool hasCursorCurrent() const
-        {
-            return cursor != nullptr;
-        }
-
-        bool hasCursorNext() const
-        {
-            return cursor != nullptr && cursor->next != nullptr;
-        }
-
-        bool hasCursorPrev() const
-        {
-            return cursor != nullptr && cursor->prev != nullptr;
-        }
-
-        bool moveCursorNext()
-        {
-            if (hasCursorNext())
-            {
-                cursor = cursor->next;
-                return true;
-            }
-            return false;
-        }
-
-        bool moveCursorPrev()
-        {
-            if (hasCursorPrev())
-            {
-                cursor = cursor->prev;
-                return true;
-            }
-            return false;
-        }
-
-        T getCursorData() const
-        {
-            if (cursor != nullptr)
-            {
-                return cursor->data;
-            }
-            return T();
+            table = new LinkedList<Entry>[capacity];
         }
 };

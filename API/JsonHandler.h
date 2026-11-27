@@ -15,7 +15,6 @@ using json = nlohmann::json;
 class JSONHandler
 {
 public:
-    // Convert a TestCase into JSON
     static json testCaseToJSON(const TestCase& testCase)
     {
         json data;
@@ -24,7 +23,6 @@ public:
         return data;
     }
 
-    // Convert a Problem into JSON
     static json problemToJSON(const Problem& problem)
     {
         json data;
@@ -37,10 +35,22 @@ public:
         data["rating"] = problem.getDifficultyRating();
         data["difficultyRating"] = problem.getDifficultyRating();
         data["testCaseCount"] = problem.getTestCaseCount();
+
+        // Expose test cases with input and expected output for the UI
+        json testList = json::array();
+        for (int i = 0; i < problem.getTestCaseCount(); i++)
+        {
+            TestCase tc = problem.getTestCase(i);
+            json t;
+            t["input"] = tc.getInput();
+            t["expectedOutput"] = tc.getExpectedOutput();
+            testList.push_back(t);
+        }
+        data["testCases"] = testList;
+
         return data;
     }
 
-    // Convert a JudgeResult into JSON
     static json judgeResultToJSON(const JudgeResult& result)
     {
         json data;
@@ -53,7 +63,6 @@ public:
         return data;
     }
 
-    // Convert a Submission into JSON
     static json submissionToJSON(const Submission& submission)
     {
         json data;
@@ -67,7 +76,6 @@ public:
         return data;
     }
 
-    // Convert a User into JSON for Leaderboard
     static json userToJSON(const User& user, int rank = 0)
     {
         json data;
