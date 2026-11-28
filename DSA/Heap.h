@@ -5,7 +5,7 @@
 using namespace std;
 
 /*
-Feature 6: Heap — Live Leaderboard
+ Heap — Live Leaderboard
 MaxHeap / PriorityQueue implementation for ranking users by score/verdict
 */
 
@@ -130,6 +130,7 @@ class MaxHeap
             heap.clear();
         }
 
+        //LEADERBOARD
         // Retrieve top K items in descending rank without modifying this heap
         DynamicArray<T> getTopK(int k) const
         {
@@ -139,9 +140,12 @@ class MaxHeap
                 return result;
             }
 
+            //naje a new heap
             MaxHeap<T, Compare> copyHeap = *this;
+            //select if k exists in total size or not
             int count = k < copyHeap.getSize() ? k : copyHeap.getSize();
 
+            //put that many k into result array 
             for (int i = 0; i < count; i++)
             {
                 result.pushBack(copyHeap.pop());

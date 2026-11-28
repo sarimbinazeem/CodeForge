@@ -1,45 +1,69 @@
 #include <iostream>
+#include <stack>
+#include <string>
+#include <cctype>
+
 using namespace std;
 
+// Helper function to return precedence of operators
+int precedence(char op) {
+    if (op == '^') return 3;
+    if (op == '*' || op == '/') return 2;
+    if (op == '+' || op == '-') return 1;
+    return -1;
+}
+
+string infixToPostfix(const string& expression) {
+    stack<char> st;
+    string output = "";
+
+    for (char c : expression) {
+        // Skip whitespace if present
+        if (c == ' ') continue;
+
+        // 1. If operand, append to output
+        if (isalnum(c)) {
+            output += c;
+        }
+        // 2. If '(', push to stack
+        else if (c == '(') {
+            st.push(c);
+        }
+        // 3. If ')', pop until '(' is encountered
+        else if (c == ')') {
+            while (!st.empty() && st.top() != '(') {
+                output += st.top();
+                st.pop();
+            }
+            if (!st.empty()) {
+                st.pop(); // Discard '('
+            }
+        }
+        // 4. If operator
+        else {
+            while (!st.empty() && st.top() != '(' &&
+                  (precedence(st.top()) > precedence(c) ||
+                  (precedence(st.top()) == precedence(c) && c != '^'))) {
+                output += st.top();
+                st.pop();
+            }
+            st.push(c);
+        }
+    }
+
+    // 5. Pop all remaining operators from the stack
+    while (!st.empty()) {
+        output += st.top();
+        st.pop();
+    }
+
+    return output;
+}
+
 int main() {
-    int r, c;
-    if (!(cin >> r >> c) || r <= 0 || c <= 0) return 0;
-
-    // Dynamically allocate an array of row pointers
-    int** matrix = new int*[r];
-
-    // Allocate memory for each row
-    for (int i = 0; i < r; i++) {
-        *(matrix + i) = new int[c];
+    string expr;
+    if (cin >> expr) {
+        cout << infixToPostfix(expr) << endl;
     }
-
-    int sum = 0;
-
-    // Read elements and compute the total sum
-    for (int i = 0; i < r; i++) {
-        for (int j = 0; j < c; j++) {
-            cin >> *(*(matrix + i) + j);
-            sum += *(*(matrix + i) + j);
-        }
-    }
-
-    // Display the matrix row by row
-    for (int i = 0; i < r; i++) {
-        for (int j = 0; j < c; j++) {
-            cout << *(*(matrix + i) + j);
-            if (j < c - 1) cout << " ";
-        }
-        cout << "\n";
-    }
-
-    // Print the total sum
-    cout << "Sum: " << sum << "\n";
-
-    // Deallocate memory for each row, then the array of pointers
-    for (int i = 0; i < r; i++) {
-        delete[] *(matrix + i);
-    }
-    delete[] matrix;
-
     return 0;
 }

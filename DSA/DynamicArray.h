@@ -53,6 +53,7 @@ class DynamicArray
                     newArray[i] = other.array[i];
                 }
 
+                //delte old array
                 delete[] array;
 
                 array = newArray;

@@ -36,7 +36,7 @@ struct HashHelper<string>
 };
 
 /*
-Feature 5: Hash Table — Instant Problem Lookup
+ Hash Table — Instant Problem Lookup
 Supports O(1) average lookup by ID, title, and tags
 */
 

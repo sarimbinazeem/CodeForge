@@ -5,7 +5,7 @@
 using namespace std;
 
 /*
-Feature 7: Binary Search Tree — Learning Roadmap
+ Binary Search Tree — Learning Roadmap
 Organizes problems by difficulty or ID; supports ordered traversal and range queries
 */
 
@@ -86,13 +86,14 @@ class BinarySearchTree
         {
             if (current == nullptr) return;
 
-            // If current key is greater than low, left subtree might have values
+            //we will go to the range 
+            //if the current is greater than key, we go to left subtree
             if (current->key > low)
             {
                 rangeQueryHelper(current->left, low, high, result);
             }
 
-            // If current key is in range [low, high]
+            // If current key is in range then push the number into the array
             if (current->key >= low && current->key <= high)
             {
                 result.pushBack(current->value);
@@ -128,6 +129,7 @@ class BinarySearchTree
     public:
         BinarySearchTree() : root(nullptr), size(0) {}
 
+        //copy constructor
         BinarySearchTree(const BinarySearchTree& other)
         {
             root = copyTree(other.root);
@@ -138,6 +140,7 @@ class BinarySearchTree
         {
             if (this != &other)
             {
+                //clear previous tree if exists
                 clear();
                 root = copyTree(other.root);
                 size = other.size;
@@ -160,7 +163,8 @@ class BinarySearchTree
             return searchHelper(root, key, result);
         }
 
-        // Ordered traversal: delivers sequential learning progression from easiest to hardest
+        // Ordered traversal
+        //This is to display easiest to harderst
         DynamicArray<Value> inOrderTraversal() const
         {
             DynamicArray<Value> result;
@@ -168,7 +172,8 @@ class BinarySearchTree
             return result;
         }
 
-        // Range query: retrieves all items with keys in [low, high]
+        //Ranged Search
+        //To filter problems in a certain range
         DynamicArray<Value> rangeQuery(Key low, Key high) const
         {
             DynamicArray<Value> result;

@@ -7,8 +7,9 @@
 using namespace std;
 
 /*
-Feature 8: Graph — Skill Dependency System
-Directed Graph modeling prerequisites, unlocks, and curriculum progression
+ Graph — Skill Dependency System
+Directed Graph 
+ prerequisites,unlocks, and curriculum progression
 */
 
 class Graph
@@ -22,8 +23,8 @@ class Graph
         };
 
         DynamicArray<string> vertices;
-        DynamicArray<EdgeNode*> adjList;    // outgoing: u -> v (u is prerequisite of v)
-        DynamicArray<EdgeNode*> inList;     // incoming: v has prerequisite u
+        DynamicArray<EdgeNode*> adjList;    // Outdegree: u is prerequisite of v
+        DynamicArray<EdgeNode*> inList;     // Indegree: v has prerequisite u
 
         int findVertexIndex(const string& name) const
         {
@@ -47,6 +48,7 @@ class Graph
 
         void clear()
         {
+            //clear outdegree
             for (int i = 0; i < adjList.getSize(); i++)
             {
                 EdgeNode* cur = adjList[i];
@@ -57,6 +59,7 @@ class Graph
                     delete temp;
                 }
             }
+            //clear indegree
             for (int i = 0; i < inList.getSize(); i++)
             {
                 EdgeNode* cur = inList[i];
@@ -74,11 +77,13 @@ class Graph
 
         int addVertex(const string& name)
         {
+            //check for duplicate
             int existing = findVertexIndex(name);
             if (existing != -1) return existing;
 
             int idx = vertices.getSize();
             vertices.pushBack(name);
+            //currently this vertex have no indegree or no outdegree
             adjList.pushBack(nullptr);
             inList.pushBack(nullptr);
             return idx;
@@ -86,9 +91,11 @@ class Graph
 
         bool addPrerequisite(const string& prerequisite, const string& dependent)
         {
+            //connect two vertices
             int u = addVertex(prerequisite);
             int v = addVertex(dependent);
 
+            //update the adjancey lsits
             // Add u -> v in adjList
             EdgeNode* outEdge = new EdgeNode(v);
             outEdge->next = adjList[u];
@@ -104,10 +111,13 @@ class Graph
 
         DynamicArray<string> getPrerequisites(const string& topic) const
         {
+            //we get from indegrees
             DynamicArray<string> result;
             int v = findVertexIndex(topic);
             if (v == -1) return result;
 
+            // here cur contains the list of vertex v that contains a list of every node 
+            //that sends an edge towards v
             EdgeNode* cur = inList[v];
             while (cur != nullptr)
             {
@@ -119,6 +129,7 @@ class Graph
 
         DynamicArray<string> getDependents(const string& topic) const
         {
+            //we get from outdegrees
             DynamicArray<string> result;
             int u = findVertexIndex(topic);
             if (u == -1) return result;
@@ -167,7 +178,7 @@ class Graph
             {
                 string topic = vertices[i];
 
-                // Skip if already completed
+                // Skip if already completed (Already mastered topic wont need to be mastered again)
                 bool alreadyCompleted = false;
                 for (int j = 0; j < completedTopics.getSize(); j++)
                 {
@@ -193,6 +204,7 @@ class Graph
             int numV = vertices.getSize();
             if (numV == 0) return order;
 
+            //calculate indegrees
             DynamicArray<int> inDegree(numV);
             for (int i = 0; i < numV; i++)
             {
@@ -206,6 +218,7 @@ class Graph
                 inDegree.pushBack(deg);
             }
 
+            //enqueu the nodes whose indgeree is 0
             Queue<int> q;
             for (int i = 0; i < numV; i++)
             {
@@ -215,11 +228,15 @@ class Graph
                 }
             }
 
+            //now run the loop until empty
             while (!q.isEmpty())
             {
+                //dequeue and put in final array
                 int u = q.dequeue();
                 order.pushBack(vertices[u]);
 
+                //check the adjacent of this node and decrement by 1
+                //if the neighbors become 0 then enququ them
                 EdgeNode* cur = adjList[u];
                 while (cur != nullptr)
                 {
